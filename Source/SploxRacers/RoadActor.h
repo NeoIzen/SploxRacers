@@ -3,31 +3,34 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "RoadData.h"
 #include "RoadActor.generated.h"
 
 UCLASS()
 class SPLOXRACERS_API ARoadActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ARoadActor();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 	// Called every frame
-	virtual void Tick( float DeltaSeconds ) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	UPROPERTY(EditDefaultsOnly)
-	USceneComponent* SceneRoot;
-
-	UPROPERTY(EditDefaultsOnly)
 	class USplineComponent* Spline;
 
 	UPROPERTY(EditAnywhere, Category = "Generation")
-	float Spacing;
+	TArray<FRoadData> RoadDataArray;
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool DrawTrackPointNumbers;
+
+	void BuildTrackElement(uint32 LoopIndex, UStaticMesh* TrackElementMesh);
 };

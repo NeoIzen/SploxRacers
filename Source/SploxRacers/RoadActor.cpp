@@ -2,6 +2,7 @@
 
 #include "SploxRacers.h"
 #include "RoadActor.h"
+#include "TrackElements.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Runtime/Engine/Classes/Components/SplineComponent.h>
 #include <Runtime/Engine/Classes/Components/SplineMeshComponent.h>
@@ -16,6 +17,7 @@ ARoadActor::ARoadActor()
 
 	// Build hirarchy
 	Spline = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
+	Spline->SetMobility(EComponentMobility::Static);
 	RootComponent = Spline;
 
 	// Set default values
@@ -29,20 +31,9 @@ void ARoadActor::BeginPlay()
 
 }
 
-// Called every frame
-void ARoadActor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ARoadActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
-	UStaticMesh* RoadMesh = static_cast<UStaticMesh*>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Props/RoadMesh.RoadMesh"))); // TODO: Load from library class
-	UStaticMesh* LeftRailMesh = static_cast<UStaticMesh*>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Props/L_GuardRail.L_GuardRail")));
-	UStaticMesh* RightRailMesh = static_cast<UStaticMesh*>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Props/R_GuardRail.R_GuardRail")));
 
 	uint32 SplinePoints = static_cast<uint32>(Spline->GetNumberOfSplinePoints());
 	if(!Spline->IsClosedLoop())
@@ -52,12 +43,24 @@ void ARoadActor::OnConstruction(const FTransform& Transform)
 
 	for(uint32 Index = 0u; Index < SplinePoints; Index++)
 	{
-		BuildTrackElement(Index, RoadMesh);
+		if(Index == 0u)
+			BuildTrackElement(Index, AStartElement::StaticClass());
+		else
+		{
+			switch(RoadDataArray[Index].RoadElementID)
+			{
+			case 2: // Speed
+				break;
+			case 1: // Normal
+			default:
+				BuildTrackElement(Index, ATrackElement::StaticClass());
+			}
+		}
 
 		if(RoadDataArray[Index].LeftRail)
-			BuildTrackElement(Index, LeftRailMesh);
+			BuildTrackElement(Index, ALeftGuardRailElement::StaticClass());
 		if(RoadDataArray[Index].RightRail)
-			BuildTrackElement(Index, RightRailMesh);
+			BuildTrackElement(Index, ARightGuardRailElement::StaticClass());
 	}
 
 	if(DrawTrackPointNumbers)
@@ -79,16 +82,13 @@ void ARoadActor::OnConstruction(const FTransform& Transform)
 			TextRenderComp->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
 			TextRenderComp->WorldSize = 300.f;
 
-			TextRenderComp->SetText(FString::FromInt(Index));
+			TextRenderComp->SetText(FText::AsNumber(Index));//  FString::FromInt(Index));
 		}
 	}
 }
 
-void ARoadActor::BuildTrackElement(uint32 LoopIndex, UStaticMesh* TrackElementMesh)
+void ARoadActor::BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass)
 {
-	if(TrackElementMesh == nullptr)
-		return;
-
 	uint32 CurrentLoopIndex = LoopIndex;
 	uint32 NextLoopIndex = (LoopIndex + 1) % Spline->GetNumberOfSplinePoints();
 
@@ -103,26 +103,19 @@ void ARoadActor::BuildTrackElement(uint32 LoopIndex, UStaticMesh* TrackElementMe
 	float EndRoll = RoadDataArray[NextLoopIndex].TrackBank;
 	FVector2D EndScale = FVector2D(RoadDataArray[NextLoopIndex].TrackWidth, RoadDataArray[NextLoopIndex].TrackThickness);
 
-	// Create spline mesh component
-	USplineMeshComponent* SplineMeshComp = NewObject<USplineMeshComponent>(this);
-	SplineMeshComp->RegisterComponent();
+	// Create track element
+	UChildActorComponent* TrackElement = NewObject<UChildActorComponent>(this);
+	TrackElement->SetMobility(EComponentMobility::Static);
+	TrackElement->RegisterComponent();
+	TrackElement->SetChildActorClass(InClass);
+	TrackElement->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+	TrackElement->CreateChildActor();
+	TrackElement->SetupAttachment(Spline);
+	TrackElement->GetChildActor()->AttachToComponent(Spline, FAttachmentTransformRules::KeepWorldTransform);
 
-	SplineMeshComp->SetupAttachment(Spline);
-	SplineMeshComp->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-	SplineMeshComp->bSmoothInterpRollScale = true;
-	SplineMeshComp->SetMobility(EComponentMobility::Static);
-
-	SplineMeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	SplineMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-	// Load and set mesh
-	SplineMeshComp->SetStaticMesh(TrackElementMesh);
-
-	// Set start and end
-	SplineMeshComp->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent);
-	SplineMeshComp->SetStartRoll(StartRoll);
-	SplineMeshComp->SetEndRoll(EndRoll);
-	SplineMeshComp->SetStartScale(StartScale);
-	SplineMeshComp->SetEndScale(EndScale);
+	// Set values
+	ABasicTrackElement* const BasicTrackElement = static_cast<ABasicTrackElement*>(TrackElement->GetChildActor());
+	BasicTrackElement->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent);
+	BasicTrackElement->SetRoll(StartRoll, EndRoll);
+	BasicTrackElement->SetScale(StartScale, EndScale);
 }
-

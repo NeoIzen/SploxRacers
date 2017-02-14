@@ -18,9 +18,6 @@ public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Called every frame
-	virtual void Tick(float DeltaSeconds) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -32,5 +29,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DrawTrackPointNumbers;
 
-	void BuildTrackElement(uint32 LoopIndex, UStaticMesh* TrackElementMesh);
+	void BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass);
 };

@@ -23,6 +23,9 @@ struct SPLOXRACERS_API FRoadData
 	UPROPERTY(EditAnywhere)
 	float TrackThickness;
 
+	UPROPERTY(EditAnywhere)
+	uint32 RoadElementID;
+
 	FRoadData()
 	{
 		LeftRail = false;
@@ -30,5 +33,7 @@ struct SPLOXRACERS_API FRoadData
 		TrackBank = 0.f;
 		TrackWidth = 1.f;
 		TrackThickness = 1.f;
+
+		RoadElementID = 1u;
 	}
 };

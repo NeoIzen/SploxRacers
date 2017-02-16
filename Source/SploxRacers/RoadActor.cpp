@@ -7,12 +7,9 @@
 #include <Runtime/Engine/Classes/Components/SplineComponent.h>
 #include <Runtime/Engine/Classes/Components/SplineMeshComponent.h>
 
-
-
-// Sets default values
 ARoadActor::ARoadActor()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// The track will never tic
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Build hirarchy
@@ -24,53 +21,53 @@ ARoadActor::ARoadActor()
 	DrawTrackPointNumbers = false;
 }
 
-// Called when the game starts or when spawned
-void ARoadActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
 void ARoadActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	uint32 SplinePoints = static_cast<uint32>(Spline->GetNumberOfSplinePoints());
+	// Clear all children
+	ChildActors.Empty();
+
+	uint32 NumSplinePoints = static_cast<uint32>(Spline->GetNumberOfSplinePoints());
+	// If it's not a closed track, remove one element
 	if(!Spline->IsClosedLoop())
-		SplinePoints--;
+		NumSplinePoints--;
 
+	// TODO: Make sure the spline always has at least 2 points
 	RoadDataArray.SetNum(Spline->GetNumberOfSplinePoints());
+	SetStartValues();
 
-	for(uint32 Index = 0u; Index < SplinePoints; Index++)
+	// Create track elements between all spline points
+	for(uint32 Index = 0u; Index < NumSplinePoints; Index++)
 	{
-		if(Index == 0u)
-			BuildTrackElement(Index, AStartElement::StaticClass());
-		else
+		switch(RoadDataArray[Index].RoadElementID)
 		{
-			switch(RoadDataArray[Index].RoadElementID)
-			{
-			case 2: // Speed
-				break;
-			case 1: // Normal
-			default:
-				BuildTrackElement(Index, ATrackElement::StaticClass());
-			}
+		case FTrackElementID::Start: // Start
+			BuildTrackElement(Index, AStartElement::StaticClass());
+			break;
+		case FTrackElementID::Speed: // Speed
+			break;
+		case FTrackElementID::Road: // Normal
+		default:
+			BuildTrackElement(Index, ATrackElement::StaticClass());
 		}
 
+		// Create rail guards if they are enabled
 		if(RoadDataArray[Index].LeftRail)
 			BuildTrackElement(Index, ALeftGuardRailElement::StaticClass());
 		if(RoadDataArray[Index].RightRail)
 			BuildTrackElement(Index, ARightGuardRailElement::StaticClass());
 	}
 
+	// Helper to build a track
+	// Draw the spline point numbers on top of them to find the right array element corresponding to the spline point
 	if(DrawTrackPointNumbers)
 	{
-		for(uint32 Index = 0u; Index < SplinePoints; Index++)
+		for(uint32 Index = 0u; Index < NumSplinePoints; Index++)
 		{
 			UTextRenderComponent* TextRenderComp = NewObject<UTextRenderComponent>(this);
-			TextRenderComp->RegisterComponent();
 
-			TextRenderComp->SetupAttachment(Spline);
+			TextRenderComp->AttachToComponent(Spline, FAttachmentTransformRules::KeepWorldTransform);
 			TextRenderComp->CreationMethod = EComponentCreationMethod::UserConstructionScript;
 
 			FVector Location;
@@ -82,15 +79,43 @@ void ARoadActor::OnConstruction(const FTransform& Transform)
 			TextRenderComp->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
 			TextRenderComp->WorldSize = 300.f;
 
-			TextRenderComp->SetText(FText::AsNumber(Index));//  FString::FromInt(Index));
+			TextRenderComp->SetText(FText::AsNumber(Index));
+
+			TextRenderComp->RegisterComponent();
 		}
+	}
+}
+
+void ARoadActor::SetStartValues()
+{
+	// Make the start element to be always a certain way
+	RoadDataArray[0].TrackBank = 0.f;
+	RoadDataArray[0].TrackWidth = 1.f;
+	RoadDataArray[0].TrackThickness = 1.f;
+	RoadDataArray[0].RoadElementID = FTrackElementID::Start;
+
+	RoadDataArray[1].TrackBank = 0.f;
+	RoadDataArray[1].TrackWidth = 1.f;
+	RoadDataArray[1].TrackThickness = 1.f;
+
+	// Make sure the second point has always a certain distance to the first
+	FVector Location0 = Spline->GetLocationAtSplinePoint(0, ESplineCoordinateSpace::Local);
+	FVector Location1 = Spline->GetLocationAtSplinePoint(1, ESplineCoordinateSpace::Local);
+
+	const float DesiredDistance = 1000.f; // 10m
+	if(FVector::Dist(Location0, Location1) < DesiredDistance)
+	{
+		FVector Direction = Location1 - Location0;
+		Direction.Normalize();
+
+		Spline->SetLocationAtSplinePoint(1, Location0 + Direction * DesiredDistance, ESplineCoordinateSpace::Local);
 	}
 }
 
 void ARoadActor::BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass)
 {
 	uint32 CurrentLoopIndex = LoopIndex;
-	uint32 NextLoopIndex = (LoopIndex + 1) % Spline->GetNumberOfSplinePoints();
+	uint32 NextLoopIndex = (LoopIndex + 1) % Spline->GetNumberOfSplinePoints(); // Wrap around so after the last we get the first point
 
 	// Get start and end values between points
 	FVector StartLocation = Spline->GetLocationAtSplinePoint(CurrentLoopIndex, ESplineCoordinateSpace::World);
@@ -106,12 +131,14 @@ void ARoadActor::BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass
 	// Create track element
 	UChildActorComponent* TrackElement = NewObject<UChildActorComponent>(this);
 	TrackElement->SetMobility(EComponentMobility::Static);
-	TrackElement->RegisterComponent();
 	TrackElement->SetChildActorClass(InClass);
-	TrackElement->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+	TrackElement->CreationMethod = EComponentCreationMethod::UserConstructionScript; // Make sure a rebuild deletes all
 	TrackElement->CreateChildActor();
-	TrackElement->SetupAttachment(Spline);
+	TrackElement->AttachToComponent(Spline, FAttachmentTransformRules::KeepWorldTransform);
 	TrackElement->GetChildActor()->AttachToComponent(Spline, FAttachmentTransformRules::KeepWorldTransform);
+	TrackElement->RegisterComponent();
+
+	ChildActors.Add(TrackElement);
 
 	// Set values
 	ABasicTrackElement* const BasicTrackElement = static_cast<ABasicTrackElement*>(TrackElement->GetChildActor());

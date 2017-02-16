@@ -6,7 +6,7 @@
 #include "LeftGuardRailElement.generated.h"
 
 /**
- * 
+ * Left guard rail track element
  */
 UCLASS()
 class SPLOXRACERS_API ALeftGuardRailElement : public ABasicTrackElement

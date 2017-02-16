@@ -6,19 +6,16 @@
 #include "RoadData.h"
 #include "RoadActor.generated.h"
 
+/*
+* Actor to build the entire racing track
+*/
 UCLASS()
 class SPLOXRACERS_API ARoadActor : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	ARoadActor();
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	virtual void OnConstruction(const FTransform& Transform) override;
 private:
 	UPROPERTY(EditDefaultsOnly)
 	class USplineComponent* Spline;
@@ -29,5 +26,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DrawTrackPointNumbers;
 
+	UPROPERTY()
+	TArray<UChildActorComponent*> ChildActors;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	void SetStartValues();
 	void BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass);
 };

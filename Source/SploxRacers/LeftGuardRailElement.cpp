@@ -7,8 +7,10 @@ UStaticMesh* ALeftGuardRailElement::Mesh = nullptr;
 
 ALeftGuardRailElement::ALeftGuardRailElement() : ABasicTrackElement()
 {
+	/* Load resources */
 	if(Mesh == nullptr)
-		Mesh = static_cast<UStaticMesh*>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Props/L_GuardRail.L_GuardRail")));
+		Mesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Props/L_GuardRail.L_GuardRail")).Object;
 
+	/* Create and configure spline mesh */
 	CreateSplineMeshComponent(Mesh);
 }

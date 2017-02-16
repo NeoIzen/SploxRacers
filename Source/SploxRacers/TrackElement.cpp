@@ -8,8 +8,10 @@ UStaticMesh* ATrackElement::Mesh = nullptr;
 
 ATrackElement::ATrackElement() : ABasicTrackElement()
 {
+	/* Load resources */
 	if(Mesh == nullptr)
-		Mesh = static_cast<UStaticMesh*>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Props/RoadMesh.RoadMesh")));
+		Mesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Props/RoadMesh.RoadMesh")).Object;
 
+	/* Create and configure spline mesh */
 	CreateSplineMeshComponent(Mesh);
 }

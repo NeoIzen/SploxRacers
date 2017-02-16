@@ -6,7 +6,7 @@
 
 ABasicTrackElement::ABasicTrackElement() : SplineMeshComponent(nullptr)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// The road doesn't need to tick
 	PrimaryActorTick.bCanEverTick = false;
 }
 
@@ -29,11 +29,14 @@ void ABasicTrackElement::SetScale(FVector2D StartScale, FVector2D EndScale)
 
 void ABasicTrackElement::CreateSplineMeshComponent(UStaticMesh* Mesh)
 {
+	// Create mesh component and set static mesh
 	SplineMeshComponent = CreateDefaultSubobject<USplineMeshComponent>(TEXT("MeshComponent"));
 	SplineMeshComponent->SetStaticMesh(Mesh);
 	SplineMeshComponent->bSmoothInterpRollScale = true;
+	// Enable collision
 	SplineMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+	// Set as root component
 	RootComponent = SplineMeshComponent;
 }

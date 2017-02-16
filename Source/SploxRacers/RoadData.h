@@ -3,6 +3,14 @@
 #include "Engine.h"
 #include "RoadData.generated.h"
 
+UENUM(BlueprintType)
+enum class FTrackElementID : uint8
+{
+	Start UMETA(DisplayName = "Start"),
+	Road UMETA(DisplayName = "Road"),
+	Speed UMETA(DisplayName = "Speed"),
+};
+
 USTRUCT()
 struct SPLOXRACERS_API FRoadData
 {
@@ -24,7 +32,7 @@ struct SPLOXRACERS_API FRoadData
 	float TrackThickness;
 
 	UPROPERTY(EditAnywhere)
-	uint32 RoadElementID;
+	FTrackElementID RoadElementID;
 
 	FRoadData()
 	{
@@ -34,6 +42,6 @@ struct SPLOXRACERS_API FRoadData
 		TrackWidth = 1.f;
 		TrackThickness = 1.f;
 
-		RoadElementID = 1u;
+		RoadElementID = FTrackElementID::Road;
 	}
 };

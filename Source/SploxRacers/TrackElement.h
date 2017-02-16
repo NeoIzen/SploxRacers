@@ -6,7 +6,7 @@
 #include "TrackElement.generated.h"
 
 /**
- * 
+ * Default track element to drive on
  */
 UCLASS()
 class SPLOXRACERS_API ATrackElement : public ABasicTrackElement

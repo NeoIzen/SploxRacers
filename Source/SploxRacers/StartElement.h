@@ -6,7 +6,7 @@
 #include "StartElement.generated.h"
 
 /**
- * 
+ * Track element for the start of the track.
  */
 UCLASS()
 class SPLOXRACERS_API AStartElement : public ABasicTrackElement
@@ -15,6 +15,19 @@ class SPLOXRACERS_API AStartElement : public ABasicTrackElement
 
 public:
 	AStartElement();
+
+	virtual void SetStartAndEnd(FVector StartPos, FVector StartTangent, FVector EndPos, FVector EndTangent) override;
+	virtual void SetRoll(float StartRoll, float EndRoll) override;
+	virtual void SetScale(FVector2D StartScale, FVector2D EndScale) override;
 private:
 	static UStaticMesh* Mesh;
+	static UMaterialInterface* DecalMaterial;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* TriggerArea;
+
+	UPROPERTY(EditDefaultsOnly)
+	UDecalComponent* Decal;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
 };

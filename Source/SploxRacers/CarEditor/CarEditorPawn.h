@@ -37,4 +37,5 @@ private:
 	class AGhostBlock* GhostBlock;
 
 	void RotateCamera(float AxisValue);
+	void PlaceBlock();
 };

@@ -16,7 +16,7 @@ class SPLOXRACERS_API UGrid : public UObject
 public:
 	UGrid();
 
-	FVector GetGridLocationFromWorld(FVector WorldLocation);
+	FVector GetGridLocationFromWorld(FVector WorldLocation) const;
 private:
 	FVector CellSize;
 	FVector CellCount;

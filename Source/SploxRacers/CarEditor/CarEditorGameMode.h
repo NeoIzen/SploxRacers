@@ -13,7 +13,6 @@ class SPLOXRACERS_API ACarEditorGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	ACarEditorGameMode();
 };

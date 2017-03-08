@@ -9,4 +9,23 @@ AGhostBlock::AGhostBlock()
 	SetActorTickEnabled(false);
 
 	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
+
+	Enabled = false;
+}
+
+void AGhostBlock::Disable()
+{
+	Enabled = false;
+	SetActorHiddenInGame(!Enabled);
+}
+
+void AGhostBlock::Enable()
+{
+	Enabled = true;
+	SetActorHiddenInGame(!Enabled);
+}
+
+bool AGhostBlock::IsActive() const
+{
+	return Enabled;
 }

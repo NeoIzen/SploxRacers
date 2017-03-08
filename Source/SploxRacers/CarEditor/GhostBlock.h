@@ -18,4 +18,8 @@ public:
 
 	void Disable();
 	void Enable();
+
+	bool IsActive() const;
+private:
+	bool Enabled;
 };

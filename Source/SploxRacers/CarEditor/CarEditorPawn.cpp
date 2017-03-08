@@ -3,6 +3,7 @@
 #include "SploxRacers.h"
 #include "CarEditorPawn.h"
 #include "GhostBlock.h"
+#include "CarEditorGameState.h"
 
 // Sets default values
 ACarEditorPawn::ACarEditorPawn()
@@ -35,7 +36,6 @@ void ACarEditorPawn::BeginPlay()
 	if(PC)
 	{
 		PC->bShowMouseCursor = true;
-		PC->bEnableClickEvents = true;
 		PC->bEnableMouseOverEvents = true;
 	}
 
@@ -61,12 +61,18 @@ void ACarEditorPawn::Tick(float DeltaTime)
 		FHitResult HitResult;
 		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult))
 		{
-			GhostBlock->SetActorHiddenInGame(false);
-			GhostBlock->SetActorLocation(HitResult.ImpactPoint);
+			ACarEditorGameState* GameState = GetWorld() == nullptr? nullptr : GetWorld()->GetGameState<ACarEditorGameState>();
+			if(GameState == nullptr) return;
+
+			GhostBlock->Enable();
+
+			// Calcuate ghost location
+			FVector Location = GameState->GetGrid()->GetGridLocationFromWorld(HitResult.ImpactPoint);
+			GhostBlock->SetActorLocation(Location);
 		}
 		else
 		{
-			GhostBlock->SetActorHiddenInGame(true);
+			GhostBlock->Disable();
 		}
 	}
 }
@@ -78,6 +84,7 @@ void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	Super::SetupPlayerInputComponent(InputComponent);
 
 	InputComponent->BindAxis("RotateCameraHorizontal", this, &ACarEditorPawn::RotateCamera);
+	InputComponent->BindAction("PlaceBlock", IE_Pressed, this, &ACarEditorPawn::PlaceBlock);
 }
 
 void ACarEditorPawn::RotateCamera(float AxisValue)
@@ -85,3 +92,12 @@ void ACarEditorPawn::RotateCamera(float AxisValue)
 	CameraInput = AxisValue;
 }
 
+void ACarEditorPawn::PlaceBlock()
+{
+	if(!GhostBlock->IsActive())
+		return;
+
+	// Spawn new block
+	FVector SpawnLocation = GhostBlock->GetActorLocation();
+	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+}

@@ -22,4 +22,6 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* StaticMeshComponent;
+
+	bool ShouldRegisterToGrid;
 };

@@ -2,6 +2,8 @@
 
 #include "SploxRacers.h"
 #include "Grid.h"
+#include "CarEditorGameState.h"
+#include "BasicBlock.h"
 
 UGrid::UGrid()
 {
@@ -9,21 +11,67 @@ UGrid::UGrid()
 	CellCount = FVector(10, 10, 10);
 }
 
-// IDEA: only get face of block and block which is hit. then return hitblock.position + facenormal * cellsize
-FVector UGrid::GetGridLocationFromWorld(FVector WorldLocation) const
+FVector UGrid::GetGridLocationFromWorldLocation(FVector WorldLocation) const
 {
-	FVector CellLocation;
+	return GetGridPointFromWorldLocation(WorldLocation) * CellSize;
+}
 
-	CellLocation.X = WorldLocation.X / (CellSize.X);
-	CellLocation.Y = WorldLocation.Y / (CellSize.Y);
-	CellLocation.Z = WorldLocation.Z / (CellSize.Z);
+FVector UGrid::GetGridPointFromWorldLocation(FVector WorldLocation) const
+{
+	auto Round = [](float val) -> int32
+	{
+		if(val < 0.0f)
+			return static_cast<int32>(val - 0.5f + 0.0001f);
+		else
+			return static_cast<int32>(val + 0.5f - 0.0001f);
+	};
 
-	CellLocation.X = CellLocation.X < 0.f ? FMath::CeilToInt(CellLocation.X) : FMath::FloorToInt(CellLocation.X);
-	CellLocation.Y = CellLocation.Y < 0.f ? FMath::CeilToInt(CellLocation.Y) : FMath::FloorToInt(CellLocation.Y);
-	CellLocation.Z = CellLocation.Z < 0.f ? FMath::CeilToInt(CellLocation.Z) : FMath::FloorToInt(CellLocation.Z);
+	FVector CellID;
 
-	UE_LOG(LogTemp, Display, TEXT("World: (%.2f | %.2f | %.2f)"), WorldLocation.X, WorldLocation.Y, WorldLocation.Z);
-	UE_LOG(LogTemp, Display, TEXT("Cell : (%.2f | %.2f | %.2f)"), CellLocation.X, CellLocation.Y, CellLocation.Z);
+	CellID.X = Round(WorldLocation.X / (CellSize.X));
+	CellID.Y = Round(WorldLocation.Y / (CellSize.Y));
+	CellID.Z = Round(WorldLocation.Z / (CellSize.Z));
 
-	return CellLocation * CellSize;
+	return CellID;
+}
+
+FVector UGrid::GetWorldLocationFromGridPoint(FVector GridIndex) const
+{
+	return GridIndex * CellSize;
+}
+
+bool UGrid::AddBlockToGrid(ABasicBlock* Block)
+{
+	int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Block->GetActorLocation()));
+
+	// Check if cell is already occupied
+	if(Blocks.Contains(Hash))
+		return false;
+
+	Blocks.Add(Hash, Block);
+
+	return true;
+}
+
+UGrid* UGrid::GetInstance(AActor* Actor)
+{
+	ACarEditorGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ACarEditorGameState>() : nullptr;
+
+	return GameState != nullptr? GameState->GetGrid() : nullptr;
+}
+
+int64 UGrid::HashFromGridPoint(const FVector& GridIndex) const
+{
+	int16 X = GridIndex.X;
+	int16 Y = GridIndex.Y;
+	int16 Z = GridIndex.Z;
+
+	int64 Hash = 0;
+	Hash |= Z;
+	Hash <<= 16;
+	Hash |= Y;
+	Hash <<= 16;
+	Hash |= X;
+
+	return Hash;
 }

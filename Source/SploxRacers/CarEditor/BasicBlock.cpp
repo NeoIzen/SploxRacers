@@ -2,6 +2,7 @@
 
 #include "SploxRacers.h"
 #include "BasicBlock.h"
+#include "Grid.h"
 
 // Sets default values
 ABasicBlock::ABasicBlock()
@@ -18,6 +19,9 @@ ABasicBlock::ABasicBlock()
 
 	// Ignore camera collision
 	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	// Register all Blocks to the grid
+	ShouldRegisterToGrid = true;
 }
 
 // Called when the game starts or when spawned
@@ -25,4 +29,6 @@ void ABasicBlock::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if(ShouldRegisterToGrid)
+		UGrid::GetInstance(this)->AddBlockToGrid(this);
 }

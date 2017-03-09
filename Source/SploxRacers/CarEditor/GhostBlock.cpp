@@ -11,6 +11,8 @@ AGhostBlock::AGhostBlock()
 	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
 
 	Enabled = false;
+
+	ShouldRegisterToGrid = false;
 }
 
 void AGhostBlock::Disable()

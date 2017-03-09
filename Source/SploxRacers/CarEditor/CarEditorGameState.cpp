@@ -8,7 +8,7 @@ ACarEditorGameState::ACarEditorGameState()
 	Grid = NewObject<UGrid>();
 }
 
-UGrid const* ACarEditorGameState::GetGrid() const
+UGrid* ACarEditorGameState::GetGrid() const
 {
 	return Grid;
 }

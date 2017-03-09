@@ -34,6 +34,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UCameraComponent* Camera;
 
+	UPROPERTY()
+	class ABasicBlock* StartBlock;
+	UPROPERTY()
 	class AGhostBlock* GhostBlock;
 
 	void RotateCamera(float AxisValue);

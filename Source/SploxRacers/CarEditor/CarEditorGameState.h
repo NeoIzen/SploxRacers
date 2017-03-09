@@ -17,7 +17,7 @@ class SPLOXRACERS_API ACarEditorGameState : public AGameStateBase
 public:
 	ACarEditorGameState();
 
-	UGrid const* GetGrid() const;
+	UGrid* GetGrid() const;
 private:
-	UGrid const* Grid;
+	UGrid* Grid;
 };

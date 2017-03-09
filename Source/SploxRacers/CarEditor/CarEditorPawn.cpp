@@ -3,7 +3,7 @@
 #include "SploxRacers.h"
 #include "CarEditorPawn.h"
 #include "GhostBlock.h"
-#include "CarEditorGameState.h"
+#include "Grid.h"
 
 // Sets default values
 ACarEditorPawn::ACarEditorPawn()
@@ -39,6 +39,9 @@ void ACarEditorPawn::BeginPlay()
 		PC->bEnableMouseOverEvents = true;
 	}
 
+	// Create the start block
+	StartBlock = GetWorld()->SpawnActor<ABasicBlock>(UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero));
+
 	// Create ghost block
 	GhostBlock = GetWorld()->SpawnActor<AGhostBlock>();
 }
@@ -61,13 +64,10 @@ void ACarEditorPawn::Tick(float DeltaTime)
 		FHitResult HitResult;
 		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult))
 		{
-			ACarEditorGameState* GameState = GetWorld() == nullptr? nullptr : GetWorld()->GetGameState<ACarEditorGameState>();
-			if(GameState == nullptr) return;
-
 			GhostBlock->Enable();
 
 			// Calcuate ghost location
-			FVector Location = GameState->GetGrid()->GetGridLocationFromWorld(HitResult.ImpactPoint);
+			FVector Location = UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(HitResult.ImpactPoint + HitResult.Normal);
 			GhostBlock->SetActorLocation(Location);
 		}
 		else
@@ -100,4 +100,6 @@ void ACarEditorPawn::PlaceBlock()
 	// Spawn new block
 	FVector SpawnLocation = GhostBlock->GetActorLocation();
 	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+
+	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
 }

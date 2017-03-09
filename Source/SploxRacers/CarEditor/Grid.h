@@ -16,8 +16,19 @@ class SPLOXRACERS_API UGrid : public UObject
 public:
 	UGrid();
 
-	FVector GetGridLocationFromWorld(FVector WorldLocation) const;
+	FVector GetGridLocationFromWorldLocation(FVector WorldLocation) const;
+	FVector GetGridPointFromWorldLocation(FVector WorldLocation) const;
+	FVector GetWorldLocationFromGridPoint(FVector GridIndex) const;
+
+	bool AddBlockToGrid(class ABasicBlock* Block);
+
+	static UGrid* GetInstance(AActor* Actor);
 private:
 	FVector CellSize;
 	FVector CellCount;
+
+	UPROPERTY()
+	TMap<int64, class ABasicBlock*> Blocks;
+
+	int64 HashFromGridPoint(const FVector& GridIndex) const;
 };

@@ -5,7 +5,7 @@
 #include "GameFramework/Pawn.h"
 #include "CarEditorPawn.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class SPLOXRACERS_API ACarEditorPawn : public APawn
 {
 	GENERATED_BODY()
@@ -22,23 +22,36 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Car Editor")
+	void SetColor(float r, float g, float b);
 private:
-	float CameraInput;
+	// Camera values
+	FVector2D CameraInput;
+	float CameraZoom;
 
 	UPROPERTY(EditAnywhere)
 	float RotationSpeed;
 
+	UPROPERTY(EditAnywhere)
+	float ZoomSpeed;
+
+	// Components
 	UPROPERTY(EditDefaultsOnly)
 	USpringArmComponent* SpringArm;
 
 	UPROPERTY(EditDefaultsOnly)
 	UCameraComponent* Camera;
 
+	// Actor references
 	UPROPERTY()
 	class ABasicBlock* StartBlock;
 	UPROPERTY()
 	class AGhostBlock* GhostBlock;
 
-	void RotateCamera(float AxisValue);
+	// Input handler
+	void RotateCameraVertical(float AxisValue);
+	void RotateCameraHorizontal(float AxisValue);
+	void ZoomCamera(float AxisValue);
 	void PlaceBlock();
 };

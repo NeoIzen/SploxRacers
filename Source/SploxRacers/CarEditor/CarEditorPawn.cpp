@@ -22,7 +22,10 @@ ACarEditorPawn::ACarEditorPawn()
 	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Set defaults
-	RotationSpeed = 100.0f;
+	RotationSpeed = 100.f;
+	ZoomSpeed = 1000.f;
+	CameraInput = FVector2D::ZeroVector;
+	CameraZoom = 0.f;
 }
 
 // Called when the game starts or when spawned
@@ -53,8 +56,12 @@ void ACarEditorPawn::Tick(float DeltaTime)
 
 	// Rotate camera
 	FRotator NewRotation = GetActorRotation();
-	NewRotation.Yaw += CameraInput * RotationSpeed * DeltaTime;
+	NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch + CameraInput.X * RotationSpeed * DeltaTime, -45.f, 45.f);
+	NewRotation.Yaw += CameraInput.Y * RotationSpeed * DeltaTime;
 	SetActorRotation(NewRotation);
+
+	// Zoom camera
+	SpringArm->TargetArmLength += CameraZoom * ZoomSpeed * DeltaTime;
 
 	// Detect block underneath cursor
 	APlayerController* PC = Cast<APlayerController>(GetController());
@@ -83,13 +90,25 @@ void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 {
 	Super::SetupPlayerInputComponent(InputComponent);
 
-	InputComponent->BindAxis("RotateCameraHorizontal", this, &ACarEditorPawn::RotateCamera);
+	InputComponent->BindAxis("RotateCameraHorizontal", this, &ACarEditorPawn::RotateCameraHorizontal);
+	InputComponent->BindAxis("RotateCameraVertical", this, &ACarEditorPawn::RotateCameraVertical);
+	InputComponent->BindAxis("ZoomCamera", this, &ACarEditorPawn::ZoomCamera);
 	InputComponent->BindAction("PlaceBlock", IE_Pressed, this, &ACarEditorPawn::PlaceBlock);
 }
 
-void ACarEditorPawn::RotateCamera(float AxisValue)
+void ACarEditorPawn::RotateCameraVertical(float AxisValue)
 {
-	CameraInput = AxisValue;
+	CameraInput.X = AxisValue;
+}
+
+void ACarEditorPawn::RotateCameraHorizontal(float AxisValue)
+{
+	CameraInput.Y = AxisValue;
+}
+
+void ACarEditorPawn::ZoomCamera(float AxisValue)
+{
+	CameraZoom = AxisValue;
 }
 
 void ACarEditorPawn::PlaceBlock()
@@ -102,4 +121,8 @@ void ACarEditorPawn::PlaceBlock()
 	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
 
 	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
+}
+
+void ACarEditorPawn::SetColor(float r, float g, float b)
+{
 }

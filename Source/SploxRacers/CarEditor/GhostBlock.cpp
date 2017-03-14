@@ -8,7 +8,7 @@ AGhostBlock::AGhostBlock()
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
 
-	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
+	//StaticMeshComponent->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/Car/GhostBlock.GhostBlock")).Object);
 
 	Enabled = false;
 

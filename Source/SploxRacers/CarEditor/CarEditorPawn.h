@@ -24,7 +24,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Car Editor")
-	void SetColor(float r, float g, float b);
+	void SetBlockColor(float r, float g, float b);
 private:
 	// Camera values
 	FVector2D CameraInput;
@@ -54,4 +54,7 @@ private:
 	void RotateCameraHorizontal(float AxisValue);
 	void ZoomCamera(float AxisValue);
 	void PlaceBlock();
+
+	//
+	FLinearColor BlockColor;
 };

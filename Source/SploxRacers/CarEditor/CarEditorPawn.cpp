@@ -26,6 +26,7 @@ ACarEditorPawn::ACarEditorPawn()
 	ZoomSpeed = 1000.f;
 	CameraInput = FVector2D::ZeroVector;
 	CameraZoom = 0.f;
+	BlockColor = FLinearColor(1.f, 1.f, 1.f);
 }
 
 // Called when the game starts or when spawned
@@ -69,7 +70,7 @@ void ACarEditorPawn::Tick(float DeltaTime)
 	if(PC)
 	{
 		FHitResult HitResult;
-		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult))
+		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
 		{
 			GhostBlock->Enable();
 
@@ -121,8 +122,12 @@ void ACarEditorPawn::PlaceBlock()
 	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
 
 	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
+
+	NewBlock->SetColor(BlockColor.R, BlockColor.G, BlockColor.B);
 }
 
-void ACarEditorPawn::SetColor(float r, float g, float b)
+void ACarEditorPawn::SetBlockColor(float r, float g, float b)
 {
+	BlockColor = FLinearColor(r, g, b);
+	GhostBlock->SetColor(r, g, b);
 }

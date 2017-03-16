@@ -14,7 +14,7 @@ ABasicBlock::ABasicBlock()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	RootComponent = StaticMeshComponent;
 	StaticMeshComponent->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Engine/BasicShapes/Cube.Cube")).Object);
-	StaticMeshComponent->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/Car/Block.Block")).Object);
+	StaticMeshComponent->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/CarEditor/Block.Block")).Object);
 	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
 
 	// Ignore camera collision
@@ -28,7 +28,14 @@ ABasicBlock::ABasicBlock()
 void ABasicBlock::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Material = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
 	
 	if(ShouldRegisterToGrid)
 		UGrid::GetInstance(this)->AddBlockToGrid(this);
+}
+
+void ABasicBlock::SetColor(float r, float g, float b)
+{
+	Material->SetVectorParameterValue(TEXT("Tint"), FLinearColor(r, g, b));
 }

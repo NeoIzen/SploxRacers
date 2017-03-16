@@ -8,11 +8,17 @@ AGhostBlock::AGhostBlock()
 	SetActorEnableCollision(false);
 	SetActorTickEnabled(false);
 
-	//StaticMeshComponent->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/Car/GhostBlock.GhostBlock")).Object);
-
 	Enabled = false;
 
 	ShouldRegisterToGrid = false;
+}
+
+// Called when the game starts or when spawned
+void AGhostBlock::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Material->SetScalarParameterValue(TEXT("Opacity"), 0.75f);
 }
 
 void AGhostBlock::Disable()

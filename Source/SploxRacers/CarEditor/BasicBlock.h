@@ -19,9 +19,15 @@ public:
 
 	// How many grid cells are occupied by this TODO: determine return type
 	void GridDimensions();
+
+	// Set color tint of the material
+	void SetColor(float r, float g, float b);
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* StaticMeshComponent;
 
 	bool ShouldRegisterToGrid;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* Material;
 };

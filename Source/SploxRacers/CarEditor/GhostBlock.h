@@ -16,6 +16,9 @@ class SPLOXRACERS_API AGhostBlock : public ABasicBlock
 public:
 	AGhostBlock();
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 	void Disable();
 	void Enable();
 

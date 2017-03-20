@@ -6,9 +6,15 @@
 ACarEditorGameState::ACarEditorGameState()
 {
 	Grid = NewObject<UGrid>();
+	BlockLibrary = NewObject<UBlockLibrary>();
 }
 
 UGrid* ACarEditorGameState::GetGrid() const
 {
 	return Grid;
+}
+
+UBlockLibrary* ACarEditorGameState::GetBlockLibrary() const
+{
+	return BlockLibrary;
 }

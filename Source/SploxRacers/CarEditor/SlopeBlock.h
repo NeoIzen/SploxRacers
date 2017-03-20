@@ -13,7 +13,7 @@ class SPLOXRACERS_API ASlopeBlock : public ABasicBlock
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	ASlopeBlock();
+private:
 };

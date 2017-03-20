@@ -10,7 +10,9 @@ AGhostBlock::AGhostBlock()
 
 	Enabled = false;
 
-	ShouldRegisterToGrid = false;
+	// Set properties
+	Properties.BlockName = "Ghost Block";
+	Properties.Weight = 0.f;
 }
 
 // Called when the game starts or when spawned

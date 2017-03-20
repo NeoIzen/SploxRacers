@@ -45,6 +45,7 @@ void ACarEditorPawn::BeginPlay()
 
 	// Create the start block
 	StartBlock = GetWorld()->SpawnActor<ABasicBlock>(UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero));
+	StartBlock->OnSpawn();
 
 	// Create ghost block
 	GhostBlock = GetWorld()->SpawnActor<AGhostBlock>();
@@ -124,6 +125,8 @@ void ACarEditorPawn::PlaceBlock()
 	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
 
 	NewBlock->SetColor(BlockColor.R, BlockColor.G, BlockColor.B);
+
+	NewBlock->OnSpawn();
 }
 
 void ACarEditorPawn::SetBlockColor(float r, float g, float b)

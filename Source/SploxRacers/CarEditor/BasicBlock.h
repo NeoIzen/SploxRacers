@@ -3,9 +3,10 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "BlockProperties.h"
 #include "BasicBlock.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class SPLOXRACERS_API ABasicBlock : public AActor
 {
 	GENERATED_BODY()
@@ -22,12 +23,18 @@ public:
 
 	// Set color tint of the material
 	void SetColor(float r, float g, float b);
+
+	void OnSpawn();
+
+	UFUNCTION(BlueprintCallable, Category = "Block Library")
+	FBlockProperties GetProperties() const;
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* StaticMeshComponent;
 
-	bool ShouldRegisterToGrid;
-
 	UPROPERTY()
 	UMaterialInstanceDynamic* Material;
+
+	UPROPERTY(VisibleAnywhere)
+	FBlockProperties Properties;
 };

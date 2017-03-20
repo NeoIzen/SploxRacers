@@ -20,8 +20,9 @@ ABasicBlock::ABasicBlock()
 	// Ignore camera collision
 	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-	// Register all Blocks to the grid
-	ShouldRegisterToGrid = true;
+	// Set properties
+	Properties.BlockName = "Chassis Full Block";
+	Properties.Weight = 10.f;
 }
 
 // Called when the game starts or when spawned
@@ -30,12 +31,19 @@ void ABasicBlock::BeginPlay()
 	Super::BeginPlay();
 
 	Material = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-	
-	if(ShouldRegisterToGrid)
-		UGrid::GetInstance(this)->AddBlockToGrid(this);
 }
 
 void ABasicBlock::SetColor(float r, float g, float b)
 {
 	Material->SetVectorParameterValue(TEXT("Tint"), FLinearColor(r, g, b));
+}
+
+void ABasicBlock::OnSpawn()
+{
+	UGrid::GetInstance(this)->AddBlockToGrid(this);
+}
+
+FBlockProperties ABasicBlock::GetProperties() const
+{
+	return Properties;
 }

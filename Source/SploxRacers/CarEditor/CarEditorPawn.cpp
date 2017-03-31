@@ -175,9 +175,9 @@ void ACarEditorPawn::PlaceBlock()
 
 	// Spawn new block
 	FVector SpawnLocation = GhostBlock->GetActorLocation();
-	//ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+	FRotator SpawnRotation = GhostBlock->GetActorRotation();
 	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID())->GetClass(),
-		SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+		SpawnLocation, SpawnRotation);
 
 	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
 

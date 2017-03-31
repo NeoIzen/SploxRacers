@@ -4,6 +4,23 @@
 #include "CarEditorPawn.h"
 #include "GhostBlock.h"
 #include "Grid.h"
+#include "BlockLibrary.h"
+#include <functional>
+
+namespace
+{
+	enum class EDirection : int
+	{
+		Xp = 1,
+		Xn,
+		Yp,
+		Yn,
+		Zp,
+		Zn,
+		Vertical = Xp,
+		Horizontal = Yp
+	};
+}
 
 // Sets default values
 ACarEditorPawn::ACarEditorPawn()
@@ -26,7 +43,6 @@ ACarEditorPawn::ACarEditorPawn()
 	ZoomSpeed = 1000.f;
 	CameraInput = FVector2D::ZeroVector;
 	CameraZoom = 0.f;
-	BlockColor = FLinearColor(1.f, 1.f, 1.f);
 }
 
 // Called when the game starts or when spawned
@@ -92,25 +108,64 @@ void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 {
 	Super::SetupPlayerInputComponent(InputComponent);
 
-	InputComponent->BindAxis("RotateCameraHorizontal", this, &ACarEditorPawn::RotateCameraHorizontal);
-	InputComponent->BindAxis("RotateCameraVertical", this, &ACarEditorPawn::RotateCameraVertical);
+	InputComponent->BindAxis("RotateCameraHorizontal", this, &ACarEditorPawn::RotateCamera<static_cast<int>(EDirection::Horizontal)>);
+	InputComponent->BindAxis("RotateCameraVertical", this, &ACarEditorPawn::RotateCamera<static_cast<int>(EDirection::Vertical)>);
 	InputComponent->BindAxis("ZoomCamera", this, &ACarEditorPawn::ZoomCamera);
+	InputComponent->BindAction("RotateBlockX+", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Xp)>);
+	InputComponent->BindAction("RotateBlockX-", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Xn)>);
+	InputComponent->BindAction("RotateBlockY+", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Yp)>);
+	InputComponent->BindAction("RotateBlockY-", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Yn)>);
+	InputComponent->BindAction("RotateBlockZ+", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Zp)>);
+	InputComponent->BindAction("RotateBlockZ-", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Zn)>);
 	InputComponent->BindAction("PlaceBlock", IE_Pressed, this, &ACarEditorPawn::PlaceBlock);
 }
 
-void ACarEditorPawn::RotateCameraVertical(float AxisValue)
+void ACarEditorPawn::RotateCamera(int Direction, float AxisValue)
 {
-	CameraInput.X = AxisValue;
-}
-
-void ACarEditorPawn::RotateCameraHorizontal(float AxisValue)
-{
-	CameraInput.Y = AxisValue;
+	switch(Direction)
+	{
+	case EDirection::Vertical:
+		CameraInput.X = AxisValue;
+		break;
+	case EDirection::Horizontal:
+		CameraInput.Y = AxisValue;
+		break;
+	}
 }
 
 void ACarEditorPawn::ZoomCamera(float AxisValue)
 {
 	CameraZoom = AxisValue;
+}
+
+void ACarEditorPawn::RotateBlock(int Direction)
+{
+	if(!GhostBlock->IsActive())
+		return;
+
+	FQuat Rotation = GhostBlock->GetActorRotation().Quaternion();
+	switch(Direction)
+	{
+	case EDirection::Xp:
+		Rotation = FQuat(FVector(1.f, 0.f, 0.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	case EDirection::Xn:
+		Rotation = FQuat(FVector(-1.f, 0.f, 0.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	case EDirection::Yp:
+		Rotation = FQuat(FVector(0.f, 1.f, 0.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	case EDirection::Yn:
+		Rotation = FQuat(FVector(0.f, -1.f, 0.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	case EDirection::Zp:
+		Rotation = FQuat(FVector(0.f, 0.f, 1.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	case EDirection::Zn:
+		Rotation = FQuat(FVector(0.f, 0.f, -1.f), FMath::DegreesToRadians(90.f)) * Rotation;
+		break;
+	}
+	GhostBlock->SetActorRotation(Rotation);
 }
 
 void ACarEditorPawn::PlaceBlock()
@@ -120,17 +175,18 @@ void ACarEditorPawn::PlaceBlock()
 
 	// Spawn new block
 	FVector SpawnLocation = GhostBlock->GetActorLocation();
-	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+	//ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(SpawnLocation, FRotator(EForceInit::ForceInitToZero));
+	ABasicBlock* NewBlock = GetWorld()->SpawnActor<ABasicBlock>(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID())->GetClass(),
+		SpawnLocation, FRotator(EForceInit::ForceInitToZero));
 
 	NewBlock->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
 
-	NewBlock->SetColor(BlockColor.R, BlockColor.G, BlockColor.B);
+	NewBlock->SetColor(GhostBlock->GetColor());
 
 	NewBlock->OnSpawn();
 }
 
-void ACarEditorPawn::SetBlockColor(float r, float g, float b)
+AGhostBlock* ACarEditorPawn::GetGhostBlock()
 {
-	BlockColor = FLinearColor(r, g, b);
-	GhostBlock->SetColor(r, g, b);
+	return GhostBlock;
 }

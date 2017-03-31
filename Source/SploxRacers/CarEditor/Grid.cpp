@@ -5,10 +5,8 @@
 #include "CarEditorGameState.h"
 #include "BasicBlock.h"
 
-UGrid::UGrid()
+UGrid::UGrid() : CellSize(100, 100, 100), CellCount(10, 10, 10)
 {
-	CellSize = FVector(100, 100, 100);
-	CellCount = FVector(10, 10, 10);
 }
 
 FVector UGrid::GetGridLocationFromWorldLocation(FVector WorldLocation) const

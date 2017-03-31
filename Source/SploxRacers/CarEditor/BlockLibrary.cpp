@@ -2,15 +2,31 @@
 
 #include "SploxRacers.h"
 #include "BlockLibrary.h"
+#include "CarEditorGameState.h"
 #include "SlopeBlock.h"
 
 UBlockLibrary::UBlockLibrary()
 {
-	BlockSet.Add(CreateDefaultSubobject<ABasicBlock>(TEXT("BasicBlock")));
-	BlockSet.Add(CreateDefaultSubobject<ASlopeBlock>(TEXT("SlopeBlock")));
+	AddBlock<ABasicBlock>(TEXT("BasicBlock"));
+	AddBlock<ASlopeBlock>(TEXT("SlopeBlock"));
 }
 
 TArray<class ABasicBlock*> UBlockLibrary::GetAllBlocks()
 {
-	return BlockSet.Array();
+	TArray<class ABasicBlock*> Array;
+	BlockMap.GenerateValueArray(Array);
+
+	return Array;
+}
+
+ABasicBlock* UBlockLibrary::GetBlock(int32 ID) const
+{
+	return BlockMap[ID];
+}
+
+UBlockLibrary* UBlockLibrary::GetInstance(AActor* Actor)
+{
+	ACarEditorGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ACarEditorGameState>() : nullptr;
+
+	return GameState != nullptr ? GameState->GetBlockLibrary() : nullptr;
 }

@@ -15,5 +15,7 @@ class SPLOXRACERS_API ASlopeBlock : public ABasicBlock
 	
 public:
 	ASlopeBlock();
+
+	virtual int32 GetID() const override;
 private:
 };

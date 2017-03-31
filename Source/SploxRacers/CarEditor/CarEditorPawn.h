@@ -24,7 +24,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Car Editor")
-	void SetBlockColor(float r, float g, float b);
+	AGhostBlock* GetGhostBlock();
 private:
 	// Camera values
 	FVector2D CameraInput;
@@ -50,11 +50,13 @@ private:
 	class AGhostBlock* GhostBlock;
 
 	// Input handler
-	void RotateCameraVertical(float AxisValue);
-	void RotateCameraHorizontal(float AxisValue);
-	void ZoomCamera(float AxisValue);
-	void PlaceBlock();
+	template<int Direction> void RotateCamera(float AxisValue) { RotateCamera(Direction, AxisValue); };
+	void RotateCamera(int Direction, float AxisValue);
 
-	//
-	FLinearColor BlockColor;
+	void ZoomCamera(float AxisValue);
+
+	template<int Direction> void RotateBlock() { RotateBlock(Direction); };
+	void RotateBlock(int Direction);
+
+	void PlaceBlock();
 };

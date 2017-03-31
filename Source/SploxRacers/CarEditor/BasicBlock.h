@@ -22,11 +22,18 @@ public:
 	void GridDimensions();
 
 	// Set color tint of the material
-	void SetColor(float r, float g, float b);
+	UFUNCTION(BlueprintCallable, Category = "Block")
+	void SetColor(FLinearColor color);
+	FLinearColor GetColor() const;
 
 	void OnSpawn();
 
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
+	UStaticMeshComponent* GetStaticMeshComponent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Block")
+	virtual int32 GetID() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Block")
 	FBlockProperties GetProperties() const;
 protected:
 	UPROPERTY(EditDefaultsOnly)

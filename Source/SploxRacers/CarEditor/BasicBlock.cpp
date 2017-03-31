@@ -33,14 +33,32 @@ void ABasicBlock::BeginPlay()
 	Material = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
 }
 
-void ABasicBlock::SetColor(float r, float g, float b)
+void ABasicBlock::SetColor(FLinearColor color)
 {
-	Material->SetVectorParameterValue(TEXT("Tint"), FLinearColor(r, g, b));
+	Material->SetVectorParameterValue(TEXT("Tint"), color);
+}
+
+FLinearColor ABasicBlock::GetColor() const
+{
+	FLinearColor Color;
+	Material->GetVectorParameterValue(TEXT("Tint"), Color);
+
+	return Color;
 }
 
 void ABasicBlock::OnSpawn()
 {
 	UGrid::GetInstance(this)->AddBlockToGrid(this);
+}
+
+UStaticMeshComponent* ABasicBlock::GetStaticMeshComponent() const
+{
+	return StaticMeshComponent;
+}
+
+int32 ABasicBlock::GetID() const
+{
+	return 1;
 }
 
 FBlockProperties ABasicBlock::GetProperties() const

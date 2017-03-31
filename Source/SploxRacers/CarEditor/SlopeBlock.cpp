@@ -5,7 +5,14 @@
 
 ASlopeBlock::ASlopeBlock()
 {
+	StaticMeshComponent->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Meshes/SlopeBlock.SlopeBlock")).Object);
+
 	// Set properties
 	Properties.BlockName = "Chassis Slope Block";
 	Properties.Weight = 10.f;
+}
+
+int32 ASlopeBlock::GetID() const
+{
+	return 2;
 }

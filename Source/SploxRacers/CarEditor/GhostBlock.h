@@ -23,6 +23,12 @@ public:
 	void Enable();
 
 	bool IsActive() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Block")
+	void SetGhostID(int32 ID);
+	int32 GetGhostID() const;
 private:
 	bool Enabled;
+
+	int32 GhostID;
 };

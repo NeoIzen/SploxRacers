@@ -19,6 +19,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	TArray<ABasicBlock*> GetAllBlocks();
+
+	ABasicBlock* GetBlock(int32 BlockID) const;
+
+	static UBlockLibrary* GetInstance(AActor* Actor);
 private:
-	TSet<ABasicBlock*> BlockSet;
+	TMap<int32, ABasicBlock*> BlockMap;
+
+	template<typename T>
+	void AddBlock(FName Name)
+	{
+		T* NewBlock = CreateDefaultSubobject<T>(Name);
+		BlockMap.Add(NewBlock->GetID(), NewBlock);
+	}
 };

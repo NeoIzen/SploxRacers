@@ -24,8 +24,8 @@ public:
 
 	static UGrid* GetInstance(AActor* Actor);
 private:
-	FVector CellSize;
-	FVector CellCount;
+	const FVector CellSize;
+	const FVector CellCount;
 
 	UPROPERTY()
 	TMap<int64, class ABasicBlock*> Blocks;

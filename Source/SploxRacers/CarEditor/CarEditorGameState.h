@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	UBlockLibrary* GetBlockLibrary() const;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
 	UPROPERTY()

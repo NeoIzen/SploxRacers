@@ -70,6 +70,18 @@ bool UGrid::AddBlockToGrid(ABasicBlock* Block)
 	return true;
 }
 
+void UGrid::RemoveBlockFromGrid(class ABasicBlock* Block)
+{
+	int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Block->GetActorLocation()));
+
+	ABasicBlock** SavedBlock = Blocks.Find(Hash);
+
+	if(SavedBlock != nullptr && Block == *SavedBlock)
+	{
+		Blocks.Remove(Hash);
+	}
+}
+
 UGrid* UGrid::GetInstance(AActor* Actor)
 {
 	ACarEditorGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ACarEditorGameState>() : nullptr;

@@ -23,6 +23,7 @@ public:
 	bool IsValidGridPoint(FVector GridIndex) const;
 
 	bool AddBlockToGrid(class ABasicBlock* Block);
+	void RemoveBlockFromGrid(class ABasicBlock* Block);
 
 	static UGrid* GetInstance(AActor* Actor);
 private:

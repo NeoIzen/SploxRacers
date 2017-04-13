@@ -131,6 +131,12 @@ void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* InputCompo
 	InputComponent->BindAction("RotateBlockZ+", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Zp)>);
 	InputComponent->BindAction("RotateBlockZ-", IE_Pressed, this, &ACarEditorPawn::RotateBlock<static_cast<int>(EDirection::Zn)>);
 	InputComponent->BindAction("PlaceBlock", IE_Pressed, this, &ACarEditorPawn::PlaceBlock);
+	InputComponent->BindAction("RemoveBlock", IE_Pressed, this, &ACarEditorPawn::RemoveBlock);
+}
+
+AGhostBlock* ACarEditorPawn::GetGhostBlock()
+{
+	return GhostBlock;
 }
 
 void ACarEditorPawn::RotateCamera(int Direction, float AxisValue)
@@ -199,7 +205,20 @@ void ACarEditorPawn::PlaceBlock()
 	NewBlock->OnSpawn();
 }
 
-AGhostBlock* ACarEditorPawn::GetGhostBlock()
+void ACarEditorPawn::RemoveBlock()
 {
-	return GhostBlock;
+	// Detect block underneath cursor
+	APlayerController* PC = Cast<APlayerController>(GetController());
+
+	if(PC)
+	{
+		FHitResult HitResult;
+		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
+		{
+			ABasicBlock* Block = Cast<ABasicBlock>(HitResult.Actor.Get());
+
+			UGrid::GetInstance(this)->RemoveBlockFromGrid(Block);
+			Block->Destroy();
+		}
+	}
 }

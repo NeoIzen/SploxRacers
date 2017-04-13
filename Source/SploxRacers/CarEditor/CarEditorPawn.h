@@ -64,4 +64,5 @@ private:
 	void RotateBlock(int Direction);
 
 	void PlaceBlock();
+	void RemoveBlock();
 };

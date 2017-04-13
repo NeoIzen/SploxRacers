@@ -10,15 +10,10 @@ ABasicBlock::ABasicBlock()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Set up hirarchy
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
-	StaticMeshComponent->SetStaticMesh(ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Engine/BasicShapes/Cube.Cube")).Object);
-	StaticMeshComponent->SetMaterial(0, ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/CarEditor/Block.Block")).Object);
-	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
 
-	// Ignore camera collision
-	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	StaticMesh = nullptr;
 
 	// Set properties
 	Properties.BlockName = "Chassis Full Block";
@@ -30,18 +25,32 @@ void ABasicBlock::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Material = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
+	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	StaticMeshComponent->SetStaticMesh(StaticMesh);
+	UMaterialInstanceDynamic* MaterialInstance = StaticMeshComponent->CreateDynamicMaterialInstance(0, Material);
+	StaticMeshComponent->SetMaterial(0, MaterialInstance);
 }
 
-void ABasicBlock::SetColor(FLinearColor color)
+void ABasicBlock::SetColor(FLinearColor Color)
 {
-	Material->SetVectorParameterValue(TEXT("Tint"), color);
+	UMaterialInstanceDynamic* MaterialInstance = Cast<UMaterialInstanceDynamic>(StaticMeshComponent->GetMaterial(0));
+
+	if(!MaterialInstance)
+		return;
+
+	MaterialInstance->SetVectorParameterValue(TEXT("Tint"), Color);
 }
 
 FLinearColor ABasicBlock::GetColor() const
 {
+	UMaterialInstanceDynamic* MaterialInstance = Cast<UMaterialInstanceDynamic>(StaticMeshComponent->GetMaterial(0));
+
+	if(!MaterialInstance)
+		return FLinearColor(1, 1, 1, 1);
+
 	FLinearColor Color;
-	Material->GetVectorParameterValue(TEXT("Tint"), Color);
+	if(!MaterialInstance->GetVectorParameterValue(TEXT("Tint"), Color))
+		return FLinearColor(1, 1, 1, 1);
 
 	return Color;
 }
@@ -51,14 +60,9 @@ void ABasicBlock::OnSpawn()
 	UGrid::GetInstance(this)->AddBlockToGrid(this);
 }
 
-UStaticMeshComponent* ABasicBlock::GetStaticMeshComponent() const
-{
-	return StaticMeshComponent;
-}
-
 int32 ABasicBlock::GetID() const
 {
-	return 1;
+	return BlockID;
 }
 
 FBlockProperties ABasicBlock::GetProperties() const

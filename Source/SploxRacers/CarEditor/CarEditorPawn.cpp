@@ -5,6 +5,7 @@
 #include "GhostBlock.h"
 #include "Grid.h"
 #include "BlockLibrary.h"
+#include "CarEditorGameState.h"
 #include <functional>
 
 namespace
@@ -60,11 +61,15 @@ void ACarEditorPawn::BeginPlay()
 	}
 
 	// Create the start block
-	StartBlock = GetWorld()->SpawnActor<ABasicBlock>(UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero));
-	StartBlock->OnSpawn();
+	if(StartBlockClass)
+	{
+		StartBlock = GetWorld()->SpawnActor<ABasicBlock>(StartBlockClass, UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero));
+		StartBlock->OnSpawn();
+	}
 
 	// Create ghost block
-	GhostBlock = GetWorld()->SpawnActor<AGhostBlock>();
+	if(GhostBlockClass)
+		GhostBlock = GetWorld()->SpawnActor<AGhostBlock>(GhostBlockClass);
 }
 
 // Called every frame
@@ -89,11 +94,19 @@ void ACarEditorPawn::Tick(float DeltaTime)
 		FHitResult HitResult;
 		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
 		{
-			GhostBlock->Enable();
+			UGrid* Grid = UGrid::GetInstance(this);
+			if(Grid->IsValidGridPoint(Grid->GetGridPointFromWorldLocation(HitResult.ImpactPoint + HitResult.ImpactNormal)))
+			{
+				GhostBlock->Enable();
 
-			// Calcuate ghost location
-			FVector Location = UGrid::GetInstance(this)->GetGridLocationFromWorldLocation(HitResult.ImpactPoint + HitResult.Normal);
-			GhostBlock->SetActorLocation(Location);
+				// Calcuate ghost location
+				FVector Location = Grid->GetGridLocationFromWorldLocation(HitResult.ImpactPoint + HitResult.Normal);
+				GhostBlock->SetActorLocation(Location);
+			}
+			else
+			{
+				GhostBlock->Disable();
+			}
 		}
 		else
 		{

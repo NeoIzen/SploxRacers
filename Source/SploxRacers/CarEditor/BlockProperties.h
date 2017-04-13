@@ -8,10 +8,10 @@ struct SPLOXRACERS_API FBlockProperties
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FString BlockName;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Weight; // kg
 
 	FBlockProperties()

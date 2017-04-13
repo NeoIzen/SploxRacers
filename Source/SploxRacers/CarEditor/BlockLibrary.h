@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class SPLOXRACERS_API UBlockLibrary : public UObject
 {
 	GENERATED_BODY()
@@ -17,19 +17,20 @@ class SPLOXRACERS_API UBlockLibrary : public UObject
 public:
 	UBlockLibrary();
 
+	static UBlockLibrary* GetInstance(AActor* Actor);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Block Library")
+	void Initialize();
+
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	TArray<ABasicBlock*> GetAllBlocks();
 
-	ABasicBlock* GetBlock(int32 BlockID) const;
+	UFUNCTION(BlueprintCallable, Category = "Block Library")
+	void AddBlock(TSubclassOf<ABasicBlock> BlockClass);
 
-	static UBlockLibrary* GetInstance(AActor* Actor);
+	UFUNCTION(BlueprintCallable, Category = "Block Library")
+	ABasicBlock* GetBlock(int32 ID) const;
 private:
+	UPROPERTY()
 	TMap<int32, ABasicBlock*> BlockMap;
-
-	template<typename T>
-	void AddBlock(FName Name)
-	{
-		T* NewBlock = CreateDefaultSubobject<T>(Name);
-		BlockMap.Add(NewBlock->GetID(), NewBlock);
-	}
 };

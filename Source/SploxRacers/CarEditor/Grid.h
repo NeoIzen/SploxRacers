@@ -20,6 +20,8 @@ public:
 	FVector GetGridPointFromWorldLocation(FVector WorldLocation) const;
 	FVector GetWorldLocationFromGridPoint(FVector GridIndex) const;
 
+	bool IsValidGridPoint(FVector GridIndex) const;
+
 	bool AddBlockToGrid(class ABasicBlock* Block);
 
 	static UGrid* GetInstance(AActor* Actor);

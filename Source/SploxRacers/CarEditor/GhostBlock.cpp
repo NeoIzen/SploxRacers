@@ -11,7 +11,7 @@ AGhostBlock::AGhostBlock()
 
 	// Set default values
 	Enabled = false;
-	GhostID = 1;
+	GhostID = -1;
 
 	// Set properties
 	Properties.BlockName = "Ghost Block";
@@ -23,7 +23,7 @@ void AGhostBlock::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Material->SetScalarParameterValue(TEXT("Opacity"), 0.75f);
+	//Material->SetScalarParameterValue(TEXT("Opacity"), 0.75f);
 }
 
 void AGhostBlock::Disable()
@@ -34,6 +34,9 @@ void AGhostBlock::Disable()
 
 void AGhostBlock::Enable()
 {
+	if(GhostID == -1)
+		SetGhostID(0);
+
 	Enabled = true;
 	SetActorHiddenInGame(!Enabled);
 }
@@ -43,20 +46,10 @@ bool AGhostBlock::IsActive() const
 	return Enabled;
 }
 
-void AGhostBlock::SetGhostID(int32 ID)
+void AGhostBlock::SetGhostID_Implementation(int32 ID)
 {
 	// Set ID
 	GhostID = ID;
-
-	// Set visuals
-	FLinearColor Color = GetColor();
-
-	UStaticMeshComponent* NewStaticMeshComponent = UBlockLibrary::GetInstance(this)->GetBlock(GhostID)->GetStaticMeshComponent();
-	StaticMeshComponent->SetStaticMesh(NewStaticMeshComponent->GetStaticMesh());
-	StaticMeshComponent->SetMaterial(0, NewStaticMeshComponent->GetMaterial(0));
-	Material = StaticMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-
-	SetColor(Color);
 }
 
 int32 AGhostBlock::GetGhostID() const

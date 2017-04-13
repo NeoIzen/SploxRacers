@@ -22,7 +22,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	UBlockLibrary* GetBlockLibrary() const;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
-	UGrid* Grid;
-	UBlockLibrary* BlockLibrary;
+	UPROPERTY()
+	mutable UGrid* Grid;
+	UPROPERTY()
+	mutable UBlockLibrary* BlockLibrary;
 };

@@ -25,6 +25,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Car Editor")
 	AGhostBlock* GetGhostBlock();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AGhostBlock> GhostBlockClass;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABasicBlock> StartBlockClass;
 private:
 	// Camera values
 	FVector2D CameraInput;

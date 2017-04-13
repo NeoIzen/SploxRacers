@@ -5,7 +5,7 @@
 #include "CarEditorGameState.h"
 #include "BasicBlock.h"
 
-UGrid::UGrid() : CellSize(100, 100, 100), CellCount(10, 10, 10)
+UGrid::UGrid() : CellSize(100, 100, 100), CellCount(11, 11, 11)
 {
 }
 
@@ -36,6 +36,25 @@ FVector UGrid::GetGridPointFromWorldLocation(FVector WorldLocation) const
 FVector UGrid::GetWorldLocationFromGridPoint(FVector GridIndex) const
 {
 	return GridIndex * CellSize;
+}
+
+bool UGrid::IsValidGridPoint(FVector GridIndex) const
+{
+	// Convert from [0|x] to [-y|y]
+	FVector Min;
+	Min = -((CellCount - FVector(1, 1, 1)) / 2);
+	Min.X = FMath::CeilToInt(Min.X);
+	Min.Y = FMath::CeilToInt(Min.Y);
+	Min.Z = FMath::CeilToInt(Min.Z);
+
+	FVector Max;
+	Max = (CellCount - FVector(1, 1, 1)) / 2;
+	Max.X = FMath::CeilToInt(Max.X);
+	Max.Y = FMath::CeilToInt(Max.Y);
+	Max.Z = FMath::CeilToInt(Max.Z);
+
+	// Test if grid point is in between min and max
+	return ((GridIndex.X >= Min.X) && (GridIndex.X <= Max.X)) && ((GridIndex.Y >= Min.Y) && (GridIndex.Y <= Max.Y)) && ((GridIndex.Z >= Min.Z) && (GridIndex.Z <= Max.Z));
 }
 
 bool UGrid::AddBlockToGrid(ABasicBlock* Block)

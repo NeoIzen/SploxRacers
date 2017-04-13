@@ -23,25 +23,30 @@ public:
 
 	// Set color tint of the material
 	UFUNCTION(BlueprintCallable, Category = "Block")
-	void SetColor(FLinearColor color);
+	void SetColor(FLinearColor Color);
+	UFUNCTION(BlueprintCallable, Category = "Block")
 	FLinearColor GetColor() const;
 
 	void OnSpawn();
 
-	UStaticMeshComponent* GetStaticMeshComponent() const;
-
 	UFUNCTION(BlueprintCallable, Category = "Block")
-	virtual int32 GetID() const;
+	int32 GetID() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	FBlockProperties GetProperties() const;
-protected:
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* StaticMeshComponent;
 
-	UPROPERTY()
-	UMaterialInstanceDynamic* Material;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	int32 BlockID;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FBlockProperties Properties;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UMaterialInterface* Material;
+protected:
+	UPROPERTY(BlueprintReadWrite)
+	UStaticMeshComponent* StaticMeshComponent;
 };

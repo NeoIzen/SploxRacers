@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.14",
+	"EngineAssociation": "4.15",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -12,12 +12,6 @@
 				"Engine",
 				"CoreUObject"
 			]
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "VictoryUMG",
-			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

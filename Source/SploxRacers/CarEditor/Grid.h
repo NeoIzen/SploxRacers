@@ -8,7 +8,7 @@
 /**
  *
  */
-UCLASS()
+UCLASS(BlueprintType)
 class SPLOXRACERS_API UGrid : public UObject
 {
 	GENERATED_BODY()
@@ -30,8 +30,8 @@ private:
 	const FVector CellSize;
 	const FVector CellCount;
 
-	UPROPERTY()
-	TMap<int64, class ABasicBlock*> Blocks;
+	UPROPERTY(VisibleAnywhere)
+	TMap<uint64, class ABasicBlock*> Blocks;
 
-	int64 HashFromGridPoint(const FVector& GridIndex) const;
+	uint64 HashFromGridPoint(const FVector& GridIndex) const;
 };

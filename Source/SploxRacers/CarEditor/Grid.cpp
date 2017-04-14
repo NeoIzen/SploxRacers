@@ -89,18 +89,18 @@ UGrid* UGrid::GetInstance(AActor* Actor)
 	return GameState != nullptr? GameState->GetGrid() : nullptr;
 }
 
-int64 UGrid::HashFromGridPoint(const FVector& GridIndex) const
+uint64 UGrid::HashFromGridPoint(const FVector& GridIndex) const
 {
-	int16 X = GridIndex.X;
-	int16 Y = GridIndex.Y;
-	int16 Z = GridIndex.Z;
+	uint16 X = GridIndex.X;
+	uint16 Y = GridIndex.Y;
+	uint16 Z = GridIndex.Z;
 
-	int64 Hash = 0;
+	uint64 Hash = 0;
 	Hash |= Z;
 	Hash <<= 16;
 	Hash |= Y;
 	Hash <<= 16;
 	Hash |= X;
 
-	return Hash;
+	return std::hash<uint64>{}(Hash);
 }

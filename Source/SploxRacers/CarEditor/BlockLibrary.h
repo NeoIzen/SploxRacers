@@ -31,6 +31,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	ABasicBlock* GetBlock(int32 ID) const;
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Instanced)
 	TMap<int32, ABasicBlock*> BlockMap;
 };

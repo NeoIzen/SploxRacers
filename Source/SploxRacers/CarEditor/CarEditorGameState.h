@@ -26,8 +26,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
-	UPROPERTY()
+	UPROPERTY(Instanced, VisibleAnywhere)
 	mutable UGrid* Grid;
-	UPROPERTY()
+	UPROPERTY(Instanced, VisibleAnywhere)
 	mutable UBlockLibrary* BlockLibrary;
 };

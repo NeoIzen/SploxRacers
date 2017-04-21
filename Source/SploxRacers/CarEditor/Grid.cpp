@@ -89,6 +89,14 @@ UGrid* UGrid::GetInstance(AActor* Actor)
 	return GameState != nullptr? GameState->GetGrid() : nullptr;
 }
 
+void UGrid::SaveToFile(FString filename)
+{
+}
+
+void UGrid::LoadFromFile(FString filename)
+{
+}
+
 uint64 UGrid::HashFromGridPoint(const FVector& GridIndex) const
 {
 	uint16 X = GridIndex.X;

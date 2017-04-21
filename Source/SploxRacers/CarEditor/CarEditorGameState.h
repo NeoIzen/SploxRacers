@@ -18,6 +18,7 @@ class SPLOXRACERS_API ACarEditorGameState : public AGameStateBase
 public:
 	ACarEditorGameState();
 
+	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	UGrid* GetGrid() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Block Library")

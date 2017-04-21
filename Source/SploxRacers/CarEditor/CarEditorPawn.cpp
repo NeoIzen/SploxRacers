@@ -217,8 +217,11 @@ void ACarEditorPawn::RemoveBlock()
 		{
 			ABasicBlock* Block = Cast<ABasicBlock>(HitResult.Actor.Get());
 
-			UGrid::GetInstance(this)->RemoveBlockFromGrid(Block);
-			Block->Destroy();
+			if(Block->Properties.Removable)
+			{
+				UGrid::GetInstance(this)->RemoveBlockFromGrid(Block);
+				Block->Destroy();
+			}
 		}
 	}
 }

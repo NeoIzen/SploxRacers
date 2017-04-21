@@ -26,6 +26,12 @@ public:
 	void RemoveBlockFromGrid(class ABasicBlock* Block);
 
 	static UGrid* GetInstance(AActor* Actor);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void SaveToFile(FString filename);
+
+	UFUNCTION(BlueprintCallable, Category = "Grid")
+	void LoadFromFile(FString filename);
 private:
 	const FVector CellSize;
 	const FVector CellCount;

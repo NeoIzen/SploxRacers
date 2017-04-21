@@ -12,7 +12,13 @@ struct SPLOXRACERS_API FBlockProperties
 	FString BlockName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString Category;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Weight; // kg
+
+	UPROPERTY(EditAnywhere)
+	bool Removable;
 
 	FBlockProperties()
 	{

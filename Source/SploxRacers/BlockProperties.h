@@ -23,6 +23,8 @@ struct SPLOXRACERS_API FBlockProperties
 	FBlockProperties()
 	{
 		BlockName = TEXT("INVALID BLOCK NAME");
+		Category = TEXT("");
 		Weight = 1.f;
+		Removable = true;
 	}
 };

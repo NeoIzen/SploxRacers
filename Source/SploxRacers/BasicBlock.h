@@ -27,8 +27,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	FLinearColor GetColor() const;
 
-	void OnSpawn();
-
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	int32 GetID() const;
 

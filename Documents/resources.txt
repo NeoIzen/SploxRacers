@@ -1,3 +1,6 @@
 Create road from spline
 https://www.youtube.com/watch?v=3GIcFrR-bJk&index=1&list=PLHadbgEqCTxDgj-RwPQGkaUypb05NJYN6
 https://youtu.be/wR0fH6O9jD8
+
+Saving/Loading
+https://wiki.unrealengine.com/Save_System,_Read_%26_Write_Any_Data_to_Compressed_Binary_Files

@@ -2,7 +2,7 @@
 
 #include "SploxRacers.h"
 #include "BlockLibrary.h"
-#include "CarEditorGameState.h"
+#include "SploxRacersGameState.h"
 
 UBlockLibrary::UBlockLibrary()
 {
@@ -10,7 +10,7 @@ UBlockLibrary::UBlockLibrary()
 
 UBlockLibrary* UBlockLibrary::GetInstance(AActor* Actor)
 {
-	ACarEditorGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ACarEditorGameState>() : nullptr;
+	ASploxRacersGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ASploxRacersGameState>() : nullptr;
 
 	return GameState != nullptr ? GameState->GetBlockLibrary() : nullptr;
 }

@@ -2,33 +2,17 @@
 
 #pragma once
 
-#include "Grid.h"
-#include "BlockLibrary.h"
-#include "GameFramework/GameStateBase.h"
+#include "../SploxRacersGameState.h"
 #include "CarEditorGameState.generated.h"
 
 /**
  *
  */
 UCLASS(BlueprintType)
-class SPLOXRACERS_API ACarEditorGameState : public AGameStateBase
+class SPLOXRACERS_API ACarEditorGameState : public ASploxRacersGameState
 {
 	GENERATED_BODY()
 
 public:
-	ACarEditorGameState();
-
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	UGrid* GetGrid() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	UBlockLibrary* GetBlockLibrary() const;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
-	UPROPERTY(Instanced, VisibleAnywhere)
-	mutable UGrid* Grid;
-	UPROPERTY(Instanced, VisibleAnywhere)
-	mutable UBlockLibrary* BlockLibrary;
 };

@@ -55,11 +55,6 @@ FLinearColor ABasicBlock::GetColor() const
 	return Color;
 }
 
-void ABasicBlock::OnSpawn()
-{
-	UGrid::GetInstance(this)->AddBlockToGrid(this);
-}
-
 int32 ABasicBlock::GetID() const
 {
 	return BlockID;

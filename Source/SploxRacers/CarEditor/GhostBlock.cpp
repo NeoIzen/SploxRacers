@@ -35,7 +35,7 @@ void AGhostBlock::Disable()
 void AGhostBlock::Enable()
 {
 	if(GhostID == -1)
-		SetGhostID(0);
+		SetGhostID(1); // Adjust if default block changes
 
 	Enabled = true;
 	SetActorHiddenInGame(!Enabled);

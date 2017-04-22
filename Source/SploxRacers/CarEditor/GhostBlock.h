@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CarEditor/BasicBlock.h"
+#include "../BasicBlock.h"
 #include "GhostBlock.generated.h"
 
 /**

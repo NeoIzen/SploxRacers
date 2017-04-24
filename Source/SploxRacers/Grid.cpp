@@ -5,6 +5,7 @@
 #include "SploxRacersGameState.h"
 #include "BasicBlock.h"
 #include "CarSaveLoad.h"
+#include "UtilityLib.h"
 #include "FileManager.h"
 
 UGrid::UGrid() : CellSize(100, 100, 100), CellCount(11, 11, 11)
@@ -138,8 +139,8 @@ void UGrid::SaveToFile(FString Filename)
 	Compressor.Flush();
 
 	// Save to file
-	FString SaveDir = FPaths::GameDir().Append(TEXT("Cars/"));
-	SaveDir.Append(Filename).Append(TEXT(".src"));
+	FString SaveDir = UUtilityLib::GetCarPath();
+	SaveDir.Append(Filename).Append(UUtilityLib::GetCarExtension());
 
 	FFileHelper::SaveArrayToFile(CompressedData, *SaveDir);
 }
@@ -147,8 +148,9 @@ void UGrid::SaveToFile(FString Filename)
 void UGrid::LoadFromFile(FString Filename)
 {
 	// Read from file
-	FString LoadDir = FPaths::GameDir().Append(TEXT("Cars/"));
-	LoadDir.Append(Filename).Append(TEXT(".src"));
+	FString LoadDir = UUtilityLib::GetCarPath();
+	Filename = Filename.Replace(TEXT(".src"), TEXT(""));
+	LoadDir.Append(Filename).Append(UUtilityLib::GetCarExtension());
 
 	TArray<uint8> CompressedData;
 	if(!FFileHelper::LoadFileToArray(CompressedData, *LoadDir))

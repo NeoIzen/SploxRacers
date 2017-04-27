@@ -94,12 +94,13 @@ void ACarEditorPawn::Tick(float DeltaTime)
 		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
 		{
 			UGrid* Grid = UGrid::GetInstance(this);
-			if(Grid->IsValidGridPoint(Grid->GetGridPointFromWorldLocation(HitResult.ImpactPoint + HitResult.ImpactNormal)))
+			FVector GridPoint = Grid->GetGridPointFromWorldLocation(HitResult.Actor->GetActorLocation() + HitResult.Normal * Grid->CellSize);
+			if(Grid->IsValidGridPoint(GridPoint))
 			{
 				GhostBlock->Enable();
 
 				// Calcuate ghost location
-				FVector Location = Grid->GetGridLocationFromWorldLocation(HitResult.ImpactPoint + HitResult.Normal);
+				FVector Location = Grid->GetWorldLocationFromGridPoint(GridPoint);
 				GhostBlock->SetActorLocation(Location);
 			}
 			else

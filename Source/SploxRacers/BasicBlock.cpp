@@ -13,7 +13,15 @@ ABasicBlock::ABasicBlock()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	RootComponent = StaticMeshComponent;
 
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
+	BoxCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	BoxCollider->SetBoxExtent(FVector(5, 5, 5));
+	BoxCollider->SetRelativeLocation(FVector::ZeroVector);
+
 	StaticMesh = nullptr;
+	Material = nullptr;
+
+	Tint = FLinearColor(1.f, 1.f, 1.f);
 
 	// Set properties
 	Properties.BlockName = "Chassis Full Block";
@@ -25,7 +33,7 @@ void ABasicBlock::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	StaticMeshComponent->SetStaticMesh(StaticMesh);
 	UMaterialInstanceDynamic* MaterialInstance = StaticMeshComponent->CreateDynamicMaterialInstance(0, Material);
 	StaticMeshComponent->SetMaterial(0, MaterialInstance);
@@ -38,21 +46,13 @@ void ABasicBlock::SetColor(FLinearColor Color)
 	if(!MaterialInstance)
 		return;
 
+	Tint = Color;
 	MaterialInstance->SetVectorParameterValue(TEXT("Tint"), Color);
 }
 
 FLinearColor ABasicBlock::GetColor() const
 {
-	UMaterialInstanceDynamic* MaterialInstance = Cast<UMaterialInstanceDynamic>(StaticMeshComponent->GetMaterial(0));
-
-	if(!MaterialInstance)
-		return FLinearColor(1, 1, 1, 1);
-
-	FLinearColor Color;
-	if(!MaterialInstance->GetVectorParameterValue(TEXT("Tint"), Color))
-		return FLinearColor(1, 1, 1, 1);
-
-	return Color;
+	return Tint;
 }
 
 int32 ABasicBlock::GetID() const

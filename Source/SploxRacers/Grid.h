@@ -37,10 +37,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void LoadFromFile(FString Filename);
-private:
+
 	const FVector CellSize;
 	const FVector CellCount;
-
+private:
 	UPROPERTY()
 	class ABasicBlock* StartBlock;
 

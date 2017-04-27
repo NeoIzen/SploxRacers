@@ -18,9 +18,6 @@ public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// How many grid cells are occupied by this TODO: determine return type
-	void GridDimensions();
-
 	// Set color tint of the material
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	void SetColor(FLinearColor Color);
@@ -47,4 +44,9 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UBoxComponent* BoxCollider;
+
+	FLinearColor Tint;
 };

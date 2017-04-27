@@ -8,7 +8,7 @@
 #include "UtilityLib.h"
 #include "FileManager.h"
 
-UGrid::UGrid() : CellSize(100, 100, 100), CellCount(11, 11, 11)
+UGrid::UGrid() : CellSize(10, 10, 10), CellCount(21, 21, 21)
 {
 }
 
@@ -126,7 +126,12 @@ void UGrid::SaveToFile(FString Filename)
 	// Create binary save
 	FBufferArchive ToBinary;
 
-	CarData Data = CarSaveLoad::CreateCarData(*Blocks.Find(HashFromGridPoint(GetGridPointFromWorldLocation(FVector(0, 0, 0)))));
+	TArray<ABasicBlock*> Children;
+	Blocks.GenerateValueArray(Children);
+
+	Children.Remove(StartBlock);
+
+	CarData Data = CarSaveLoad::CreateCarData(StartBlock, Children);
 
 	CarSaveLoad::SaveLoad(ToBinary, Data);
 

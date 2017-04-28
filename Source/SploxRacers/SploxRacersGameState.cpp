@@ -5,18 +5,7 @@
 
 ASploxRacersGameState::ASploxRacersGameState()
 {
-	Grid = nullptr;
 	BlockLibrary = nullptr;
-}
-
-UGrid* ASploxRacersGameState::GetGrid() const
-{
-	if(!Grid)
-	{
-		Grid = NewObject<UGrid>((UObject*)this);
-	}
-
-	return Grid;
 }
 
 UBlockLibrary* ASploxRacersGameState::GetBlockLibrary() const

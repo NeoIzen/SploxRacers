@@ -8,7 +8,10 @@
 #include "UtilityLib.h"
 #include "FileManager.h"
 
-UGrid::UGrid() : CellSize(10, 10, 10), CellCount(21, 21, 21)
+const FVector UGrid::CellSize = FVector(10, 10, 10);
+const FVector UGrid::CellCount = FVector(21, 21, 21);
+
+UGrid::UGrid()
 {
 }
 
@@ -85,7 +88,8 @@ ABasicBlock* UGrid::SpawnBlock(ABasicBlock* Template, FVector const& Location, F
 	Block->SetColor(Color);
 
 	if(StartBlock)
-		Block->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
+		//Block->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
+		Block->AttachRootComponentToActor(StartBlock);
 
 	Blocks.Add(Hash, Block);
 
@@ -117,13 +121,6 @@ void UGrid::ClearGrid()
 	}
 }
 
-UGrid* UGrid::GetInstance(AActor* Actor)
-{
-	ASploxRacersGameState* GameState = Actor->GetWorld() != nullptr ? Actor->GetWorld()->GetGameState<ASploxRacersGameState>() : nullptr;
-
-	return GameState != nullptr? GameState->GetGrid() : nullptr;
-}
-
 void UGrid::SaveToFile(FString Filename)
 {
 	// Create binary save
@@ -153,7 +150,7 @@ void UGrid::SaveToFile(FString Filename)
 	FFileHelper::SaveArrayToFile(CompressedData, *SaveDir);
 }
 
-void UGrid::LoadFromFile(FString Filename)
+class ABasicBlock* UGrid::LoadFromFile(FString Filename)
 {
 	// Read from file
 	FString LoadDir = UUtilityLib::GetCarPath();
@@ -163,7 +160,7 @@ void UGrid::LoadFromFile(FString Filename)
 	TArray<uint8> CompressedData;
 	if(!FFileHelper::LoadFileToArray(CompressedData, *LoadDir))
 	{
-		return;
+		return nullptr;
 	}
 
 	// Decompress data
@@ -191,6 +188,8 @@ void UGrid::LoadFromFile(FString Filename)
 			ChildData.Transform.GetLocation(), ChildData.Transform.GetRotation().Rotator(),
 			ChildData.Color);
 	}
+
+	return StartBlock;
 }
 
 uint64 UGrid::HashFromGridPoint(const FVector& GridIndex) const

@@ -8,11 +8,17 @@
 /**
  *
  */
-UCLASS(BlueprintType)
+UCLASS()
 class SPLOXRACERS_API ACarEditorGameState : public ASploxRacersGameState
 {
 	GENERATED_BODY()
 
 public:
+	ACarEditorGameState();
+
+	UFUNCTION(BlueprintCallable, Category = "Block Library")
+	UGrid* GetGrid() const;
 private:
+	UPROPERTY(Instanced, VisibleAnywhere)
+	mutable UGrid* Grid;
 };

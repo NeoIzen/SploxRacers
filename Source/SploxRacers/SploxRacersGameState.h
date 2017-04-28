@@ -19,16 +19,11 @@ public:
 	ASploxRacersGameState();
 
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
-		UGrid* GetGrid() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-		UBlockLibrary* GetBlockLibrary() const;
+	UBlockLibrary* GetBlockLibrary() const;
 
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<UBlockLibrary> BlockLibraryClass;
+	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
 	UPROPERTY(Instanced, VisibleAnywhere)
-		mutable UGrid* Grid;
-	UPROPERTY(Instanced, VisibleAnywhere)
-		mutable UBlockLibrary* BlockLibrary;
+	mutable UBlockLibrary* BlockLibrary;
 };

@@ -35,7 +35,7 @@ public:
 	void SetStaticMesh(UStaticMesh* StaticMesh);
 	void SetMaterial(UMaterialInterface* Material);
 protected:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly)

@@ -11,18 +11,16 @@ ABasicBlock::ABasicBlock()
 	PrimaryActorTick.bCanEverTick = false;
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
-	RootComponent = StaticMeshComponent;
-
-	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
-	BoxCollider->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	BoxCollider->SetBoxExtent(FVector(5, 5, 5));
-	BoxCollider->SetRelativeLocation(FVector::ZeroVector);
 
 	// Set up collision parameters
-	BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	BoxCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	BoxCollider->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	BoxCollider->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
+	StaticMeshComponent->SetEnableGravity(false);
+	//StaticMeshComponent->SetSimulatePhysics(true);
+
+	RootComponent = StaticMeshComponent;
 
 	// Set defaults
 	StaticMesh = nullptr;

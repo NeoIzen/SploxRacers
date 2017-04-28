@@ -29,18 +29,16 @@ public:
 	void RemoveBlock(class ABasicBlock* Block);
 	void ClearGrid();
 
-	static UGrid* GetInstance(AActor* Actor);
-
 	UFUNCTION(BlueprintCallable, Category = "Grid")
 	void SaveToFile(FString Filename);
 
 	UFUNCTION(BlueprintCallable, Category = "Grid")
-	void LoadFromFile(FString Filename);
+	class ABasicBlock* LoadFromFile(FString Filename);
 
-	const FVector CellSize;
-	const FVector CellCount;
+	static const FVector CellSize;
+	static const FVector CellCount;
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	class ABasicBlock* StartBlock;
 
 	UPROPERTY(VisibleAnywhere)

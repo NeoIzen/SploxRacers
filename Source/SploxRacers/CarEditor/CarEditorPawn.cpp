@@ -62,7 +62,7 @@ void ACarEditorPawn::BeginPlay()
 	}
 
 	// Create the start block
-	UGrid::GetInstance(this)->SpawnStartBlock(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID));
+	GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->SpawnStartBlock(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID));
 
 	// Create ghost block
 	if(GhostBlockClass)
@@ -91,7 +91,7 @@ void ACarEditorPawn::Tick(float DeltaTime)
 		FHitResult HitResult;
 		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
 		{
-			UGrid* Grid = UGrid::GetInstance(this);
+			UGrid* Grid = GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid();
 			FVector GridPoint = Grid->GetGridPointFromWorldLocation(HitResult.Actor->GetActorLocation() + HitResult.Normal * Grid->CellSize);
 			if(Grid->IsValidGridPoint(GridPoint))
 			{
@@ -191,7 +191,7 @@ void ACarEditorPawn::PlaceBlock()
 		return;
 
 	// Spawn new block
-	UGrid::GetInstance(this)->SpawnBlock(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID()),
+	GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->SpawnBlock(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID()),
 		GhostBlock->GetActorLocation(), GhostBlock->GetActorRotation(),
 		GhostBlock->GetColor());
 }
@@ -208,7 +208,7 @@ void ACarEditorPawn::RemoveBlock()
 		{
 			ABasicBlock* Block = Cast<ABasicBlock>(HitResult.Actor.Get());
 			
-			UGrid::GetInstance(this)->RemoveBlock(Block);
+			GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->RemoveBlock(Block);
 		}
 	}
 }

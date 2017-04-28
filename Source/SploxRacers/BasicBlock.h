@@ -26,21 +26,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	int32 GetID() const;
+	void SetID(int32 ID);
 
 	UFUNCTION(BlueprintCallable, Category = "Block")
 	FBlockProperties GetProperties() const;
+	void SetProperties(const FBlockProperties& Properties);
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	int32 BlockID;
-
-	UPROPERTY(EditAnywhere)
-	FBlockProperties Properties;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	UStaticMesh* StaticMesh;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	UMaterialInterface* Material;
+	void SetStaticMesh(UStaticMesh* StaticMesh);
+	void SetMaterial(UMaterialInterface* Material);
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	UStaticMeshComponent* StaticMeshComponent;
@@ -48,5 +41,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly)
 	UBoxComponent* BoxCollider;
 
+	UPROPERTY(VisibleAnywhere)
 	FLinearColor Tint;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 BlockID;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(VisibleAnywhere)
+	UMaterialInterface* Material;
+
+	UPROPERTY(VisibleAnywhere)
+	FBlockProperties Properties;
 };

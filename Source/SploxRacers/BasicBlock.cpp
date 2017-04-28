@@ -18,14 +18,17 @@ ABasicBlock::ABasicBlock()
 	BoxCollider->SetBoxExtent(FVector(5, 5, 5));
 	BoxCollider->SetRelativeLocation(FVector::ZeroVector);
 
+	// Set up collision parameters
+	BoxCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BoxCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	BoxCollider->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	BoxCollider->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+
+	// Set defaults
 	StaticMesh = nullptr;
 	Material = nullptr;
 
 	Tint = FLinearColor(1.f, 1.f, 1.f);
-
-	// Set properties
-	Properties.BlockName = "Chassis Full Block";
-	Properties.Weight = 10.f;
 }
 
 // Called when the game starts or when spawned
@@ -60,7 +63,27 @@ int32 ABasicBlock::GetID() const
 	return BlockID;
 }
 
+void ABasicBlock::SetID(int32 ID)
+{
+	BlockID = ID;
+}
+
 FBlockProperties ABasicBlock::GetProperties() const
 {
 	return Properties;
+}
+
+void ABasicBlock::SetProperties(const FBlockProperties& Properties)
+{
+	this->Properties = Properties;
+}
+
+void ABasicBlock::SetStaticMesh(UStaticMesh* StaticMesh)
+{
+	this->StaticMesh = StaticMesh;
+}
+
+void ABasicBlock::SetMaterial(UMaterialInterface* Material)
+{
+	this->Material = Material;
 }

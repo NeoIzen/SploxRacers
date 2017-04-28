@@ -32,7 +32,7 @@ ACarEditorPawn::ACarEditorPawn()
 	// Create hirarchy
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	SpringArm->TargetArmLength = 1000.0f;
+	SpringArm->TargetArmLength = 200.0f;
 	SpringArm->SetRelativeRotation(FQuat(-FVector(0.f, 1.f, 0.f), FMath::DegreesToRadians(315.0f)));
 	RootComponent = SpringArm;
 
@@ -44,6 +44,7 @@ ACarEditorPawn::ACarEditorPawn()
 	ZoomSpeed = 1000.f;
 	CameraInput = FVector2D::ZeroVector;
 	CameraZoom = 0.f;
+	StartBlockID = 0;
 }
 
 // Called when the game starts or when spawned
@@ -61,10 +62,7 @@ void ACarEditorPawn::BeginPlay()
 	}
 
 	// Create the start block
-	if(StartBlockClass)
-	{
-		UGrid::GetInstance(this)->SpawnStartBlock(StartBlockClass);
-	}
+	UGrid::GetInstance(this)->SpawnStartBlock(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID));
 
 	// Create ghost block
 	if(GhostBlockClass)
@@ -193,7 +191,7 @@ void ACarEditorPawn::PlaceBlock()
 		return;
 
 	// Spawn new block
-	UGrid::GetInstance(this)->SpawnBlock(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID())->GetClass(),
+	UGrid::GetInstance(this)->SpawnBlock(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID()),
 		GhostBlock->GetActorLocation(), GhostBlock->GetActorRotation(),
 		GhostBlock->GetColor());
 }

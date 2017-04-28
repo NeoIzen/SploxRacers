@@ -29,7 +29,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AGhostBlock> GhostBlockClass;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ABasicBlock> StartBlockClass;
+	int32 StartBlockID;
 private:
 	// Camera values
 	FVector2D CameraInput;

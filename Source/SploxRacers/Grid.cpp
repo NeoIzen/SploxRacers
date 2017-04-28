@@ -65,26 +65,36 @@ bool UGrid::IsValidGridPoint(FVector GridIndex) const
 	return ((GridIndex.X >= Min.X) && (GridIndex.X <= Max.X)) && ((GridIndex.Y >= Min.Y) && (GridIndex.Y <= Max.Y)) && ((GridIndex.Z >= Min.Z) && (GridIndex.Z <= Max.Z));
 }
 
-bool UGrid::SpawnBlock(UClass* Class, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color)
+void UGrid::SpawnStartBlock(ABasicBlock* Template)
+{
+	StartBlock = SpawnBlock(Template, GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero), FLinearColor(1.f, 1.f, 1.f));
+}
+
+ABasicBlock* UGrid::SpawnBlock(ABasicBlock* Template, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color)
 {
 	int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Location));
 
 	// Check if cell is already occupied
 	if(Blocks.Contains(Hash))
-		return false;
+		return nullptr;
 
-	ABasicBlock* Block = GetWorld()->SpawnActor<ABasicBlock>(Class, Location, Rotation);
-	Block->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Template = Template;
+
+	ABasicBlock* Block = GetWorld()->SpawnActor<ABasicBlock>(Template->GetClass(), Location, Rotation, SpawnParameters);
 	Block->SetColor(Color);
+
+	if(StartBlock)
+		Block->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
 
 	Blocks.Add(Hash, Block);
 
-	return true;
+	return Block;
 }
 
 void UGrid::RemoveBlock(class ABasicBlock* Block)
 {
-	if(Block->Properties.Removable)
+	if(Block->GetProperties().Removable)
 	{
 		int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Block->GetActorLocation()));
 
@@ -105,13 +115,6 @@ void UGrid::ClearGrid()
 		Blocks.Remove(Block.Key);
 		Block.Value->Destroy();
 	}
-}
-
-void UGrid::SpawnStartBlock(TSubclassOf<class ABasicBlock> StartBlockClass)
-{
-	StartBlock = GetWorld()->SpawnActor<ABasicBlock>(StartBlockClass, GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero));
-
-	Blocks.Add(HashFromGridPoint(GetGridPointFromWorldLocation(FVector(0.f, 0.f, 0.f))), StartBlock);
 }
 
 UGrid* UGrid::GetInstance(AActor* Actor)
@@ -180,11 +183,11 @@ void UGrid::LoadFromFile(FString Filename)
 
 	// Spawn all blocks
 	UBlockLibrary* BlockLibrary = Cast<ASploxRacersGameState>(GetOuter())->GetBlockLibrary();
-	SpawnStartBlock(BlockLibrary->GetBlock(Data.ID)->GetClass());
+	SpawnStartBlock(BlockLibrary->GetBlock(Data.ID));
 
 	for(CarData ChildData : Data.Children)
 	{
-		SpawnBlock(BlockLibrary->GetBlock(ChildData.ID)->GetClass(),
+		SpawnBlock(BlockLibrary->GetBlock(ChildData.ID),
 			ChildData.Transform.GetLocation(), ChildData.Transform.GetRotation().Rotator(),
 			ChildData.Color);
 	}

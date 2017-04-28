@@ -24,11 +24,10 @@ public:
 
 	bool IsValidGridPoint(FVector GridIndex) const;
 
-	bool SpawnBlock(UClass* Class, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color);
+	void SpawnStartBlock(class ABasicBlock* Template);
+	class ABasicBlock* SpawnBlock(class ABasicBlock* Template, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color);
 	void RemoveBlock(class ABasicBlock* Block);
 	void ClearGrid();
-
-	void SpawnStartBlock(TSubclassOf<class ABasicBlock> StartBlockClass);
 
 	static UGrid* GetInstance(AActor* Actor);
 

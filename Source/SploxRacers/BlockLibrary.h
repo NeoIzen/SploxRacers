@@ -25,8 +25,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	TArray<ABasicBlock*> GetAllBlocks();
 
+	//UFUNCTION(BlueprintCallable, Category = "Block Library")
+	//void AddBlock(TSubclassOf<ABasicBlock> BlockClass);
+
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	void AddBlock(TSubclassOf<ABasicBlock> BlockClass);
+	void AddBlock(TSubclassOf<ABasicBlock> BaseClass, int32 BlockID, UStaticMesh* Mesh, UMaterialInterface* Material, FBlockProperties Properties);
 
 	UFUNCTION(BlueprintCallable, Category = "Block Library")
 	ABasicBlock* GetBlock(int32 ID) const;

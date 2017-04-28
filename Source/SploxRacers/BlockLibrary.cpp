@@ -23,9 +23,24 @@ TArray<ABasicBlock*> UBlockLibrary::GetAllBlocks()
 	return Array;
 }
 
-void UBlockLibrary::AddBlock(TSubclassOf<ABasicBlock> BlockClass)
+/*void UBlockLibrary::AddBlock(TSubclassOf<ABasicBlock> BlockClass)
 {
 	ABasicBlock* Block = NewObject<ABasicBlock>(this, BlockClass);
+	BlockMap.Emplace(Block->GetID(), Block);
+}*/
+
+void UBlockLibrary::AddBlock(TSubclassOf<ABasicBlock> BaseClass, int32 BlockID, UStaticMesh* Mesh, UMaterialInterface* Material, FBlockProperties Properties)
+{
+	// Create template
+	ABasicBlock* Block = NewObject<ABasicBlock>(this, BaseClass);
+
+	// Set values
+	Block->SetID(BlockID);
+	Block->SetStaticMesh(Mesh);
+	Block->SetMaterial(Material);
+	Block->SetProperties(Properties);
+
+	// Add to map
 	BlockMap.Emplace(Block->GetID(), Block);
 }
 

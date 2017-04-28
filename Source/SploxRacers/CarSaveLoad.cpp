@@ -28,7 +28,7 @@ CarData CarSaveLoad::CreateCarData(ABasicBlock* ParentBlock, TArray<ABasicBlock*
 		return CarData();
 
 	CarData CarData;
-	CarData.ID = ParentBlock->BlockID;
+	CarData.ID = ParentBlock->GetID();
 	CarData.Color = ParentBlock->GetColor();
 	CarData.Transform = ParentBlock->GetActorTransform();
 

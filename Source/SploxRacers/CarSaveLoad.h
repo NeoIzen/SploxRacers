@@ -33,7 +33,7 @@ FORCEINLINE FArchive& operator<<(FArchive& Ar, CarData& Data)
 class SPLOXRACERS_API CarSaveLoad
 {
 public:
-	static CarData CreateCarData(ABasicBlock* StartBlock, TArray<ABasicBlock*> ChildBlocks);
+	static CarData CreateCarData(UBasicBlock* StartBlock, TArray<UBasicBlock*> ChildBlocks);
 
 	static void SaveLoad(FArchive& Ar, CarData& Data);
 };

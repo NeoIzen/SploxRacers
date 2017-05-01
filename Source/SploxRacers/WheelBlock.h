@@ -8,12 +8,17 @@
 /**
  * 
  */
-UCLASS()
-class SPLOXRACERS_API AWheelBlock : public ABasicBlock
+UCLASS(Blueprintable)
+class SPLOXRACERS_API UWheelBlock : public UBasicBlock
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+	virtual void InitializeWheel();
+
+	UPhysicsConstraintComponent* GetPhysicsConstraintWheel();
+protected:
+	UPROPERTY(EditAnywhere)
+	class UPhysicsConstraintComponent* PhysicsConstraintWheel;
+private:
 };

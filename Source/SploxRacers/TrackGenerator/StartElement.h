@@ -8,7 +8,7 @@
 /**
  * Track element for the start of the track.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class SPLOXRACERS_API AStartElement : public ABasicTrackElement
 {
 	GENERATED_BODY()
@@ -16,18 +16,18 @@ class SPLOXRACERS_API AStartElement : public ABasicTrackElement
 public:
 	AStartElement();
 
-	virtual void SetStartAndEnd(FVector StartPos, FVector StartTangent, FVector EndPos, FVector EndTangent) override;
-	virtual void SetRoll(float StartRoll, float EndRoll) override;
-	virtual void SetScale(FVector2D StartScale, FVector2D EndScale) override;
-private:
-	static UStaticMesh* Mesh;
-	static UMaterialInterface* DecalMaterial;
+	virtual void Initialize() override;
 
-	UPROPERTY(EditDefaultsOnly)
+	void SetStartAndEnd(FVector StartPos, FVector StartTangent, FVector EndPos, FVector EndTangent) override;
+	void SetRoll(float StartRoll, float EndRoll) override;
+	void SetScale(FVector2D StartScale, FVector2D EndScale) override;
+protected:
+	UPROPERTY()
 	UBoxComponent* TriggerArea;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	UDecalComponent* Decal;
 
-	virtual void OnConstruction(const FTransform& Transform) override;
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* DecalMaterial;
 };

@@ -2,34 +2,30 @@
 
 #include "SploxRacers.h"
 #include "StartElement.h"
-#include <Kismet/KismetMathLibrary.h>
-#include <Runtime/Engine/Classes/Components/SplineMeshComponent.h>
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/SplineMeshComponent.h"
 #include <algorithm>
-
-UStaticMesh* AStartElement::Mesh = nullptr;
-UMaterialInterface* AStartElement::DecalMaterial = nullptr;
 
 AStartElement::AStartElement() : ABasicTrackElement()
 {
-	/* Load resources */
-	if(Mesh == nullptr)
-		Mesh = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Props/RoadMesh.RoadMesh")).Object;
-	if(DecalMaterial == nullptr)
-		DecalMaterial = ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT("/Game/Materials/GoalLine.GoalLine")).Object;
+}
 
-	/* Create and configure spline mesh */
-	CreateSplineMeshComponent(Mesh);
+void AStartElement::Initialize()
+{
+	Super::Initialize();
 
-	/* Create goal line trigger area */
-	TriggerArea = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger"));
+	/* Create goal line trigger */
+	TriggerArea = NewObject<UBoxComponent>(this);
+	TriggerArea->RegisterComponent();
 	TriggerArea->AttachToComponent(SplineMeshComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Make the trigger area to fit the mesh width
-	FVector Extend = FVector(75.f, Mesh->GetBoundingBox().GetExtent().Y, 500.f);
+	FVector Extend = FVector(75.f, SplineMeshComponent->GetStaticMesh()->GetBoundingBox().GetExtent().Y, 500.f);
 	TriggerArea->SetBoxExtent(Extend);
 
 	/* Create goal line decal */
-	Decal = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
+	Decal = NewObject<UDecalComponent>(this);
+	Decal->RegisterComponent();
 	Decal->AttachToComponent(TriggerArea, FAttachmentTransformRules::KeepRelativeTransform); // Attach to trigger area, so the position updates automatically when the trigger moves
 
 	std::swap(Extend.X, Extend.Z);
@@ -38,6 +34,15 @@ AStartElement::AStartElement() : ABasicTrackElement()
 
 	// Rotate decal so it points down onto the track and replace it, since the local axis won't match up with the world anymore
 	Decal->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -Extend.X), FRotator::MakeFromEuler(FVector(0.f, 90.f, 0.f)));
+
+	/* Create decal material*/
+	// Create and set the goal line material to the decal
+	UMaterialInstanceDynamic* DynDecalMaterial = UMaterialInstanceDynamic::Create(DecalMaterial, this);
+	// Calculate the Y to Z ratio to make the texture checkers always squared
+	DynDecalMaterial->SetScalarParameterValue(FName(TEXT("YZRatio")), Extend.Y / Extend.Z);
+	// Increase the amount of checker squares
+	DynDecalMaterial->SetScalarParameterValue(FName(TEXT("Tiling")), 2.f);
+	Decal->SetDecalMaterial(DynDecalMaterial);
 }
 
 void AStartElement::SetStartAndEnd(FVector StartPos, FVector StartTangent, FVector EndPos, FVector EndTangent)
@@ -61,19 +66,4 @@ void AStartElement::SetRoll(float StartRoll, float EndRoll)
 void AStartElement::SetScale(FVector2D StartScale, FVector2D EndScale)
 {
 	Super::SetScale(StartScale, EndScale);
-}
-
-void AStartElement::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	FVector Extend = Decal->DecalSize;
-
-	// Create and set the goal line material to the decal
-	UMaterialInstanceDynamic* DynDecalMaterial = UMaterialInstanceDynamic::Create(DecalMaterial, this);
-	// Calculate the Y to Z ratio to make the texture checkers always squared
-	DynDecalMaterial->SetScalarParameterValue(FName(TEXT("YZRatio")), Extend.Y / Extend.Z);
-	// Increase the amount of checker squares
-	DynDecalMaterial->SetScalarParameterValue(FName(TEXT("Tiling")), 2.f);
-	Decal->SetDecalMaterial(DynDecalMaterial);
 }

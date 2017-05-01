@@ -2,22 +2,20 @@
 
 #include "SploxRacers.h"
 #include "Grid.h"
-#include "SploxRacersGameState.h"
 #include "BasicBlock.h"
+#include "SeatBlock.h"
+#include "WheelBlock.h"
 #include "CarSaveLoad.h"
 #include "UtilityLib.h"
 #include "FileManager.h"
+#include "CarPawnBase.h"
+#include "SploxRacersGameState.h"
 
 const FVector UGrid::CellSize = FVector(10, 10, 10);
 const FVector UGrid::CellCount = FVector(21, 21, 21);
 
 UGrid::UGrid()
 {
-}
-
-class UWorld* UGrid::GetWorld() const
-{
-	return Cast<AGameStateBase>(GetOuter())->GetWorld();
 }
 
 FVector UGrid::GetGridLocationFromWorldLocation(FVector WorldLocation) const
@@ -68,12 +66,16 @@ bool UGrid::IsValidGridPoint(FVector GridIndex) const
 	return ((GridIndex.X >= Min.X) && (GridIndex.X <= Max.X)) && ((GridIndex.Y >= Min.Y) && (GridIndex.Y <= Max.Y)) && ((GridIndex.Z >= Min.Z) && (GridIndex.Z <= Max.Z));
 }
 
-void UGrid::SpawnStartBlock(ABasicBlock* Template)
+void UGrid::AddStartBlock(TSubclassOf<UBasicBlock> BlockClass)
 {
-	StartBlock = SpawnBlock(Template, GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero), FLinearColor(1.f, 1.f, 1.f));
+	StartBlock = Cast<UBasicBlock>(AddBlock(BlockClass, GetGridLocationFromWorldLocation(FVector(0.f, 0.f, 0.f)), FRotator(EForceInit::ForceInitToZero), FLinearColor(1.f, 1.f, 1.f)));
+
+	USceneComponent* OldRootComponent = Cast<ACarPawnBase>(GetOuter())->GetSpringArmComponent();
+	Cast<ACarPawnBase>(GetOuter())->SetRootComponent(StartBlock);
+	OldRootComponent->AttachToComponent(StartBlock, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
-ABasicBlock* UGrid::SpawnBlock(ABasicBlock* Template, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color)
+UBasicBlock* UGrid::AddBlock(TSubclassOf<UBasicBlock> BlockClass, FVector const& Location, FRotator const& Rotation, FLinearColor const& Color)
 {
 	int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Location));
 
@@ -81,33 +83,37 @@ ABasicBlock* UGrid::SpawnBlock(ABasicBlock* Template, FVector const& Location, F
 	if(Blocks.Contains(Hash))
 		return nullptr;
 
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Template = Template;
-
-	ABasicBlock* Block = GetWorld()->SpawnActor<ABasicBlock>(Template->GetClass(), Location, Rotation, SpawnParameters);
+	UBasicBlock* Block = NewObject<UBasicBlock>(this, BlockClass);
+	Block->CreationMethod = EComponentCreationMethod::Native;
+	Block->RegisterComponent();
+	Block->SetWorldLocationAndRotation(Location, Rotation);
 	Block->SetColor(Color);
 
 	if(StartBlock)
-		//Block->AttachToActor(StartBlock, FAttachmentTransformRules::KeepWorldTransform);
-		Block->AttachRootComponentToActor(StartBlock);
+	{	
+
+		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, !Block->GetClass()->IsChildOf<UWheelBlock>());
+
+		Block->AttachToComponent(StartBlock, AttachmentRules);
+	}
 
 	Blocks.Add(Hash, Block);
 
 	return Block;
 }
 
-void UGrid::RemoveBlock(class ABasicBlock* Block)
+void UGrid::RemoveBlock(class UBasicBlock* Block)
 {
 	if(Block->GetProperties().Removable)
 	{
-		int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Block->GetActorLocation()));
+		int64 Hash = HashFromGridPoint(GetGridPointFromWorldLocation(Block->GetComponentLocation()));
 
-		ABasicBlock** SavedBlock = Blocks.Find(Hash);
+		UBasicBlock** SavedBlock = Blocks.Find(Hash);
 
 		if(SavedBlock != nullptr && Block == *SavedBlock)
 		{
 			Blocks.Remove(Hash);
-			Block->Destroy();
+			Block->DestroyComponent();
 		}
 	}
 }
@@ -116,9 +122,14 @@ void UGrid::ClearGrid()
 {
 	for(auto Block : Blocks)
 	{
-		Blocks.Remove(Block.Key);
-		Block.Value->Destroy();
+		Block.Value->DestroyComponent();
 	}
+	Blocks.Empty();
+}
+
+UBasicBlock* UGrid::GetStartBlock() const
+{
+	return StartBlock;
 }
 
 void UGrid::SaveToFile(FString Filename)
@@ -126,7 +137,7 @@ void UGrid::SaveToFile(FString Filename)
 	// Create binary save
 	FBufferArchive ToBinary;
 
-	TArray<ABasicBlock*> Children;
+	TArray<UBasicBlock*> Children;
 	Blocks.GenerateValueArray(Children);
 
 	Children.Remove(StartBlock);
@@ -150,7 +161,7 @@ void UGrid::SaveToFile(FString Filename)
 	FFileHelper::SaveArrayToFile(CompressedData, *SaveDir);
 }
 
-class ABasicBlock* UGrid::LoadFromFile(FString Filename)
+void UGrid::LoadFromFile(FString Filename, bool CreateEditorCollider)
 {
 	// Read from file
 	FString LoadDir = UUtilityLib::GetCarPath();
@@ -160,7 +171,7 @@ class ABasicBlock* UGrid::LoadFromFile(FString Filename)
 	TArray<uint8> CompressedData;
 	if(!FFileHelper::LoadFileToArray(CompressedData, *LoadDir))
 	{
-		return nullptr;
+		return;
 	}
 
 	// Decompress data
@@ -179,17 +190,20 @@ class ABasicBlock* UGrid::LoadFromFile(FString Filename)
 	ClearGrid();
 
 	// Spawn all blocks
-	UBlockLibrary* BlockLibrary = Cast<ASploxRacersGameState>(GetOuter())->GetBlockLibrary();
-	SpawnStartBlock(BlockLibrary->GetBlock(Data.ID));
+	UBlockLibrary* BlockLibrary = Cast<ACarPawnBase>(GetOuter())->GetWorld()->GetGameState<ASploxRacersGameState>()->GetBlockLibrary();
+	AddStartBlock(BlockLibrary->GetBlock(Data.ID));
+	if(CreateEditorCollider)
+		GetStartBlock()->CreateEditorGridCollision();
 
 	for(CarData ChildData : Data.Children)
 	{
-		SpawnBlock(BlockLibrary->GetBlock(ChildData.ID),
+		UBasicBlock* Block = AddBlock(BlockLibrary->GetBlock(ChildData.ID),
 			ChildData.Transform.GetLocation(), ChildData.Transform.GetRotation().Rotator(),
 			ChildData.Color);
-	}
 
-	return StartBlock;
+		if(CreateEditorCollider)
+			Block->CreateEditorGridCollision();
+	}
 }
 
 uint64 UGrid::HashFromGridPoint(const FVector& GridIndex) const

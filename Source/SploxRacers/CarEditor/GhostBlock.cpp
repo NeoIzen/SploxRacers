@@ -13,17 +13,13 @@ AGhostBlock::AGhostBlock()
 	Enabled = false;
 	GhostID = -1;
 
-	// Set properties
-	Properties.BlockName = "Ghost Block";
-	Properties.Weight = 0.f;
+	GhostingBlock = nullptr;
 }
 
 // Called when the game starts or when spawned
 void AGhostBlock::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//Material->SetScalarParameterValue(TEXT("Opacity"), 0.75f);
 }
 
 void AGhostBlock::Disable()
@@ -34,9 +30,6 @@ void AGhostBlock::Disable()
 
 void AGhostBlock::Enable()
 {
-	if(GhostID == -1)
-		SetGhostID(1); // Adjust if default block changes
-
 	Enabled = true;
 	SetActorHiddenInGame(!Enabled);
 }
@@ -46,13 +39,23 @@ bool AGhostBlock::IsActive() const
 	return Enabled;
 }
 
-void AGhostBlock::SetGhostID_Implementation(int32 ID)
+void AGhostBlock::SetBlockToGhost(TSubclassOf<UBasicBlock> BlockToGhost)
 {
-	// Set ID
-	GhostID = ID;
+	FLinearColor Color = FLinearColor(1.f, 1.f, 1.f);
+	if(GhostingBlock)
+	{
+		Color = GhostingBlock->GetColor();
+
+		GhostingBlock->DestroyComponent();
+	}
+
+	GhostingBlock = NewObject<UBasicBlock>(this, BlockToGhost);
+	GhostingBlock->RegisterComponent();
+	GhostingBlock->SetColor(Color);
+	SetRootComponent(GhostingBlock);
 }
 
-int32 AGhostBlock::GetGhostID() const
+UBasicBlock* const AGhostBlock::GetGhostedBlock() const
 {
-	return GhostID;
+	return GhostingBlock;
 }

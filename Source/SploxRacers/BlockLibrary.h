@@ -19,21 +19,12 @@ public:
 
 	static UBlockLibrary* GetInstance(AActor* Actor);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "Block Library")
-	void Initialize();
+	UFUNCTION(BlueprintCallable, Category = "Library")
+	TArray<FBlockProperties> GetAllBlocks();
 
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	TArray<ABasicBlock*> GetAllBlocks();
-
-	//UFUNCTION(BlueprintCallable, Category = "Block Library")
-	//void AddBlock(TSubclassOf<ABasicBlock> BlockClass);
-
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	void AddBlock(TSubclassOf<ABasicBlock> BaseClass, int32 BlockID, UStaticMesh* Mesh, UMaterialInterface* Material, FBlockProperties Properties);
-
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	ABasicBlock* GetBlock(int32 ID) const;
+	UFUNCTION(BlueprintCallable, Category = "Library")
+	TSubclassOf<UBasicBlock> GetBlock(int32 ID) const;
 private:
-	UPROPERTY(VisibleAnywhere, Instanced)
-	TMap<int32, ABasicBlock*> BlockMap;
+	UPROPERTY(EditAnywhere)
+	TMap<int32, TSubclassOf<UBasicBlock>> BlockMap;
 };

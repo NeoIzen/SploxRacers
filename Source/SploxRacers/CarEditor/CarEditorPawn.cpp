@@ -5,8 +5,7 @@
 #include "GhostBlock.h"
 #include "Grid.h"
 #include "BlockLibrary.h"
-#include "CarEditorGameState.h"
-#include <functional>
+#include "SeatBlock.h"
 
 namespace
 {
@@ -29,22 +28,21 @@ ACarEditorPawn::ACarEditorPawn()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Create hirarchy
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
-	SpringArm->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	SpringArm->TargetArmLength = 200.0f;
-	SpringArm->SetRelativeRotation(FQuat(-FVector(0.f, 1.f, 0.f), FMath::DegreesToRadians(315.0f)));
+	SpringArm->TargetArmLength = 100.0f;
+	SpringArm->SetWorldRotation(FQuat(-FVector(0.f, 1.f, 0.f), FMath::DegreesToRadians(315.0f)));
 	RootComponent = SpringArm;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Set defaults
+	StartBlockID = 1;
+
 	RotationSpeed = 100.f;
 	ZoomSpeed = 1000.f;
 	CameraInput = FVector2D::ZeroVector;
 	CameraZoom = 0.f;
-	StartBlockID = 0;
 }
 
 // Called when the game starts or when spawned
@@ -52,21 +50,13 @@ void ACarEditorPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Activate mouse cursor
-	APlayerController* PC = Cast<APlayerController>(GetController());
-
-	if(PC)
-	{
-		PC->bShowMouseCursor = true;
-		PC->bEnableMouseOverEvents = true;
-	}
-
 	// Create the start block
-	GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->SpawnStartBlock(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID));
+	GetGrid()->AddStartBlock(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID));
+	GetGrid()->GetStartBlock()->CreateEditorGridCollision();
 
 	// Create ghost block
-	if(GhostBlockClass)
-		GhostBlock = GetWorld()->SpawnActor<AGhostBlock>(GhostBlockClass);
+	GhostBlock = GetWorld()->SpawnActor<AGhostBlock>();
+	GhostBlock->SetBlockToGhost(UBlockLibrary::GetInstance(this)->GetBlock(StartBlockID + 1));
 }
 
 // Called every frame
@@ -75,30 +65,28 @@ void ACarEditorPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Rotate camera
-	FRotator NewRotation = GetActorRotation();
+	FRotator NewRotation = SpringArm->GetComponentRotation();
 	NewRotation.Pitch = FMath::ClampAngle(NewRotation.Pitch + CameraInput.X * RotationSpeed * DeltaTime, -45.f, 45.f);
 	NewRotation.Yaw += CameraInput.Y * RotationSpeed * DeltaTime;
-	SetActorRotation(NewRotation);
+	SpringArm->SetRelativeRotation(NewRotation);
 
 	// Zoom camera
 	SpringArm->TargetArmLength += CameraZoom * ZoomSpeed * DeltaTime;
 
 	// Detect block underneath cursor
-	APlayerController* PC = Cast<APlayerController>(GetController());
-
-	if(PC)
+	FHitResult HitResult;
+	if(Cast<APlayerController>(GetController())->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldDynamic, false, HitResult))
 	{
-		FHitResult HitResult;
-		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
+		UBoxComponent* GridCollider = Cast<UBoxComponent>(HitResult.Component.Get());
+		if(GridCollider && GridCollider->GetOuter() && Cast<UBasicBlock>(GridCollider->GetOuter()))
 		{
-			UGrid* Grid = GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid();
-			FVector GridPoint = Grid->GetGridPointFromWorldLocation(HitResult.Actor->GetActorLocation() + HitResult.Normal * Grid->CellSize);
-			if(Grid->IsValidGridPoint(GridPoint))
+			FVector GridPoint = GetGrid()->GetGridPointFromWorldLocation(HitResult.Component->GetComponentLocation() + HitResult.Normal * Grid->CellSize);
+			if(GetGrid()->IsValidGridPoint(GridPoint))
 			{
 				GhostBlock->Enable();
 
 				// Calcuate ghost location
-				FVector Location = Grid->GetWorldLocationFromGridPoint(GridPoint);
+				FVector Location = GetGrid()->GetWorldLocationFromGridPoint(GridPoint);
 				GhostBlock->SetActorLocation(Location);
 			}
 			else
@@ -111,11 +99,14 @@ void ACarEditorPawn::Tick(float DeltaTime)
 			GhostBlock->Disable();
 		}
 	}
+	else
+	{
+		GhostBlock->Disable();
+	}
 }
 
 // Called to bind functionality to input
-#pragma warning(suppress:4458)
-void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+void ACarEditorPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(InputComponent);
 
@@ -191,9 +182,9 @@ void ACarEditorPawn::PlaceBlock()
 		return;
 
 	// Spawn new block
-	GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->SpawnBlock(UBlockLibrary::GetInstance(this)->GetBlock(GhostBlock->GetGhostID()),
+	GetGrid()->AddBlock(GhostBlock->GetGhostedBlock()->GetClass(),
 		GhostBlock->GetActorLocation(), GhostBlock->GetActorRotation(),
-		GhostBlock->GetColor());
+		GhostBlock->GetGhostedBlock()->GetColor())->CreateEditorGridCollision();
 }
 
 void ACarEditorPawn::RemoveBlock()
@@ -204,11 +195,15 @@ void ACarEditorPawn::RemoveBlock()
 	if(PC)
 	{
 		FHitResult HitResult;
-		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldStatic, false, HitResult) && Cast<ABasicBlock>(HitResult.Actor.Get()))
+		if(PC->GetHitResultUnderCursor(ECollisionChannel::ECC_WorldDynamic, false, HitResult))
 		{
-			ABasicBlock* Block = Cast<ABasicBlock>(HitResult.Actor.Get());
-			
-			GetWorld()->GetGameState<ACarEditorGameState>()->GetGrid()->RemoveBlock(Block);
+			UBoxComponent* GridCollider = Cast<UBoxComponent>(HitResult.Component.Get());
+			if(GridCollider && GridCollider->GetOuter() && Cast<UBasicBlock>(GridCollider->GetOuter()))
+			{
+				UBasicBlock* Block = Cast<UBasicBlock>(GridCollider->GetOuter());
+
+				GetGrid()->RemoveBlock(Block);
+			}
 		}
 	}
 }

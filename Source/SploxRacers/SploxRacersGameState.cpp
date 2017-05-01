@@ -8,12 +8,11 @@ ASploxRacersGameState::ASploxRacersGameState()
 	BlockLibrary = nullptr;
 }
 
-UBlockLibrary* ASploxRacersGameState::GetBlockLibrary() const
+UBlockLibrary* ASploxRacersGameState::GetBlockLibrary()
 {
 	if(!BlockLibrary)
 	{
 		BlockLibrary = NewObject<UBlockLibrary>((UObject*)this, BlockLibraryClass);
-		BlockLibrary->Initialize();
 	}
 
 	return BlockLibrary;

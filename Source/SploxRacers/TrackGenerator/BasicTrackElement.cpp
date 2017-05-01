@@ -2,12 +2,25 @@
 
 #include "SploxRacers.h"
 #include "BasicTrackElement.h"
-#include <Runtime/Engine/Classes/Components/SplineMeshComponent.h>
 
-ABasicTrackElement::ABasicTrackElement() : SplineMeshComponent(nullptr)
+ABasicTrackElement::ABasicTrackElement()
 {
-	// The road doesn't need to tick
-	PrimaryActorTick.bCanEverTick = false;
+}
+
+void ABasicTrackElement::Initialize()
+{
+	// Create mesh component and set static mesh
+	SplineMeshComponent = NewObject<USplineMeshComponent>(this);
+	SplineMeshComponent->SetStaticMesh(StaticMesh);
+	SplineMeshComponent->bSmoothInterpRollScale = true;
+
+	// Enable collision
+	SplineMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	SplineMeshComponent->RegisterComponent();
+
+	RootComponent = SplineMeshComponent;
 }
 
 void ABasicTrackElement::SetStartAndEnd(FVector StartPos, FVector StartTangent, FVector EndPos, FVector EndTangent)
@@ -25,18 +38,4 @@ void ABasicTrackElement::SetScale(FVector2D StartScale, FVector2D EndScale)
 {
 	SplineMeshComponent->SetStartScale(StartScale);
 	SplineMeshComponent->SetEndScale(EndScale);
-}
-
-void ABasicTrackElement::CreateSplineMeshComponent(UStaticMesh* Mesh)
-{
-	// Create mesh component and set static mesh
-	SplineMeshComponent = CreateDefaultSubobject<USplineMeshComponent>(TEXT("MeshComponent"));
-	SplineMeshComponent->SetStaticMesh(Mesh);
-	SplineMeshComponent->bSmoothInterpRollScale = true;
-	// Enable collision
-	SplineMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-	// Set as root component
-	RootComponent = SplineMeshComponent;
 }

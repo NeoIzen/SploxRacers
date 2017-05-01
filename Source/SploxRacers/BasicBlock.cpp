@@ -5,44 +5,66 @@
 #include "Grid.h"
 
 // Sets default values
-ABasicBlock::ABasicBlock()
+UBasicBlock::UBasicBlock()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = false;
 
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+	bAlwaysCreatePhysicsState = true;
 
 	// Set up collision parameters
-	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
-	StaticMeshComponent->SetEnableGravity(false);
-	//StaticMeshComponent->SetSimulatePhysics(true);
-
-	RootComponent = StaticMeshComponent;
+	SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	SetCollisionResponseToChannel(ECollisionChannel::ECC_PhysicsBody, ECollisionResponse::ECR_Ignore);
+	SetCollisionObjectType(ECollisionChannel::ECC_Vehicle);
+	SetEnableGravity(false);
+	SetSimulatePhysics(true);
 
 	// Set defaults
-	StaticMesh = nullptr;
-	Material = nullptr;
+	MaterialInterface = nullptr;
 
 	Tint = FLinearColor(1.f, 1.f, 1.f);
 }
 
 // Called when the game starts or when spawned
-void ABasicBlock::BeginPlay()
+void UBasicBlock::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//StaticMeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	StaticMeshComponent->SetStaticMesh(StaticMesh);
-	UMaterialInstanceDynamic* MaterialInstance = StaticMeshComponent->CreateDynamicMaterialInstance(0, Material);
-	StaticMeshComponent->SetMaterial(0, MaterialInstance);
+	UMaterialInstanceDynamic* MaterialInstance = CreateDynamicMaterialInstance(0, MaterialInterface);
+	SetMaterial(0, MaterialInstance);
 }
 
-void ABasicBlock::SetColor(FLinearColor Color)
+void UBasicBlock::DestroyComponent(bool bPromoteChildren)
 {
-	UMaterialInstanceDynamic* MaterialInstance = Cast<UMaterialInstanceDynamic>(StaticMeshComponent->GetMaterial(0));
+	Super::DestroyComponent(bPromoteChildren);
+
+	if(GridCollision)
+	{
+		GridCollision->DestroyComponent();
+		GridCollision = nullptr;
+	}
+}
+
+void UBasicBlock::CreateEditorGridCollision()
+{
+	// Deactivate own physics
+	SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Create grid collider
+	GridCollision = NewObject<UBoxComponent>(this);
+	GridCollision->SetBoxExtent(UGrid::CellSize / 2.f);
+	GridCollision->RegisterComponent();
+	GridCollision->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform);
+	GridCollision->SetRelativeLocation(FVector::ZeroVector);
+
+	GridCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GridCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+}
+
+void UBasicBlock::SetColor(FLinearColor Color)
+{
+	UMaterialInstanceDynamic* MaterialInstance = Cast<UMaterialInstanceDynamic>(GetMaterial(0));
 
 	if(!MaterialInstance)
 		return;
@@ -51,37 +73,22 @@ void ABasicBlock::SetColor(FLinearColor Color)
 	MaterialInstance->SetVectorParameterValue(TEXT("Tint"), Color);
 }
 
-FLinearColor ABasicBlock::GetColor() const
+FLinearColor UBasicBlock::GetColor() const
 {
 	return Tint;
 }
 
-int32 ABasicBlock::GetID() const
-{
-	return BlockID;
-}
-
-void ABasicBlock::SetID(int32 ID)
-{
-	BlockID = ID;
-}
-
-FBlockProperties ABasicBlock::GetProperties() const
+FBlockProperties UBasicBlock::GetProperties() const
 {
 	return Properties;
 }
 
-void ABasicBlock::SetProperties(const FBlockProperties& Properties)
+void UBasicBlock::SetProperties(const FBlockProperties& NewProperties)
 {
-	this->Properties = Properties;
+	Properties = NewProperties;
 }
 
-void ABasicBlock::SetStaticMesh(UStaticMesh* StaticMesh)
+void UBasicBlock::SetMaterialInterface(UMaterialInterface* Material)
 {
-	this->StaticMesh = StaticMesh;
-}
-
-void ABasicBlock::SetMaterial(UMaterialInterface* Material)
-{
-	this->Material = Material;
+	MaterialInterface = Material;
 }

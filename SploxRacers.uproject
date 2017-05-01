@@ -15,12 +15,6 @@
 			]
 		}
 	],
-	"Plugins": [
-		{
-			"Name": "PhysXVehicles",
-			"Enabled": true
-		}
-	],
 	"TargetPlatforms": [
 		"WindowsNoEditor"
 	]

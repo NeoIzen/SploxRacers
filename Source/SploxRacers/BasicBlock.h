@@ -2,21 +2,23 @@
 
 #pragma once
 
-#include "GameFramework/Actor.h"
+#include "Components/StaticMeshComponent.h"
 #include "BlockProperties.h"
 #include "BasicBlock.generated.h"
 
-UCLASS(BlueprintType)
-class SPLOXRACERS_API ABasicBlock : public AActor
+UCLASS(Blueprintable)
+class SPLOXRACERS_API UBasicBlock : public UStaticMeshComponent
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	ABasicBlock();
+	UBasicBlock();
 
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+
+	void CreateEditorGridCollision();
 
 	// Set color tint of the material
 	UFUNCTION(BlueprintCallable, Category = "Block")
@@ -25,34 +27,20 @@ public:
 	FLinearColor GetColor() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Block")
-	int32 GetID() const;
-	void SetID(int32 ID);
-
-	UFUNCTION(BlueprintCallable, Category = "Block")
 	FBlockProperties GetProperties() const;
-	void SetProperties(const FBlockProperties& Properties);
+	void SetProperties(const FBlockProperties& NewProperties);
 
-	void SetStaticMesh(UStaticMesh* StaticMesh);
-	void SetMaterial(UMaterialInterface* Material);
+	void SetMaterialInterface(UMaterialInterface* Material);
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* StaticMeshComponent;
-
-	UPROPERTY(VisibleDefaultsOnly)
-	UBoxComponent* BoxCollider;
-
 	UPROPERTY(VisibleAnywhere)
 	FLinearColor Tint;
 
 	UPROPERTY(VisibleAnywhere)
-	int32 BlockID;
+	UMaterialInterface* MaterialInterface;
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMesh* StaticMesh;
-
-	UPROPERTY(VisibleAnywhere)
-	UMaterialInterface* Material;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	FBlockProperties Properties;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* GridCollision;
 };

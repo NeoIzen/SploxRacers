@@ -4,6 +4,7 @@
 
 #include "GameFramework/Actor.h"
 #include "RoadData.h"
+#include "TrackPartLibrary.h"
 #include "RoadActor.generated.h"
 
 /*
@@ -16,8 +17,10 @@ class SPLOXRACERS_API ARoadActor : public AActor
 
 public:
 	ARoadActor();
+
+	class USplineComponent* GetSpline() const;
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditAnywhere)
 	class USplineComponent* Spline;
 
 	UPROPERTY(EditAnywhere, Category = "Generation")
@@ -26,11 +29,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DrawTrackPointNumbers;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UTrackPartLibrary> TrackPartLibraryClass;
+
+	UPROPERTY(Instanced, VisibleAnywhere)
+	UTrackPartLibrary* TrackPartLibrary;
+
 	UPROPERTY()
-	TArray<UChildActorComponent*> ChildActors;
+	TArray<UChildActorComponent*> TrackElements;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void SetStartValues();
-	void BuildTrackElement(uint32 LoopIndex, TSubclassOf<AActor> InClass);
+	void BuildTrackElement(uint32 LoopIndex, TSubclassOf<ABasicTrackElement> ElementClass);
 };

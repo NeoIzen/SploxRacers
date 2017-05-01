@@ -18,12 +18,12 @@ class SPLOXRACERS_API ASploxRacersGameState : public AGameStateBase
 public:
 	ASploxRacersGameState();
 
-	UFUNCTION(BlueprintCallable, Category = "Block Library")
-	UBlockLibrary* GetBlockLibrary() const;
+	UFUNCTION(BlueprintCallable, Category = "Library")
+	UBlockLibrary* GetBlockLibrary();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UBlockLibrary> BlockLibraryClass;
 private:
 	UPROPERTY(Instanced, VisibleAnywhere)
-	mutable UBlockLibrary* BlockLibrary;
+	UBlockLibrary* BlockLibrary;
 };

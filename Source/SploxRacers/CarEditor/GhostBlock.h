@@ -9,7 +9,7 @@
  *
  */
 UCLASS()
-class SPLOXRACERS_API AGhostBlock : public ABasicBlock
+class SPLOXRACERS_API AGhostBlock : public AActor
 {
 	GENERATED_BODY()
 
@@ -24,10 +24,15 @@ public:
 
 	bool IsActive() const;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Block")
-	void SetGhostID(int32 ID);
-	int32 GetGhostID() const;
+	UFUNCTION(BlueprintCallable, Category = "Ghost Block")
+	void SetBlockToGhost(TSubclassOf<UBasicBlock> BlockToGhost);
+
+	UFUNCTION(BlueprintCallable, Category = "Ghost Block")
+	UBasicBlock* const GetGhostedBlock() const;
 private:
 	bool Enabled;
 	int32 GhostID;
+
+	UPROPERTY(VisibleAnywhere)
+	UBasicBlock* GhostingBlock;
 };

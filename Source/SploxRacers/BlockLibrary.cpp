@@ -15,36 +15,27 @@ UBlockLibrary* UBlockLibrary::GetInstance(AActor* Actor)
 	return GameState != nullptr ? GameState->GetBlockLibrary() : nullptr;
 }
 
-TArray<ABasicBlock*> UBlockLibrary::GetAllBlocks()
+TArray<FBlockProperties> UBlockLibrary::GetAllBlocks()
 {
-	TArray<ABasicBlock*> Array;
+	TArray<TSubclassOf<UBasicBlock>> Array;
 	BlockMap.GenerateValueArray(Array);
 
-	return Array;
+	TArray<FBlockProperties> BlockProperties;
+
+	for(TSubclassOf<UBasicBlock> BlockClass : Array)
+	{
+		BlockProperties.Add(BlockClass->GetDefaultObject<UBasicBlock>()->GetProperties());
+	}
+
+	return BlockProperties;
 }
 
-/*void UBlockLibrary::AddBlock(TSubclassOf<ABasicBlock> BlockClass)
+TSubclassOf<UBasicBlock> UBlockLibrary::GetBlock(int32 ID) const
 {
-	ABasicBlock* Block = NewObject<ABasicBlock>(this, BlockClass);
-	BlockMap.Emplace(Block->GetID(), Block);
-}*/
+	const TSubclassOf<UBasicBlock>* Block = BlockMap.Find(ID);
 
-void UBlockLibrary::AddBlock(TSubclassOf<ABasicBlock> BaseClass, int32 BlockID, UStaticMesh* Mesh, UMaterialInterface* Material, FBlockProperties Properties)
-{
-	// Create template
-	ABasicBlock* Block = NewObject<ABasicBlock>(this, BaseClass);
-
-	// Set values
-	Block->SetID(BlockID);
-	Block->SetStaticMesh(Mesh);
-	Block->SetMaterial(Material);
-	Block->SetProperties(Properties);
-
-	// Add to map
-	BlockMap.Emplace(Block->GetID(), Block);
-}
-
-ABasicBlock* UBlockLibrary::GetBlock(int32 ID) const
-{
-	return BlockMap[ID];
+	if(Block == nullptr)
+		return TSubclassOf<UBasicBlock>();
+	else
+		return *Block;
 }

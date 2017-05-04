@@ -4,3 +4,9 @@ https://youtu.be/wR0fH6O9jD8
 
 Saving/Loading
 https://wiki.unrealengine.com/Save_System,_Read_%26_Write_Any_Data_to_Compressed_Binary_Files
+
+Vehicle Guide
+https://docs.unrealengine.com/latest/INT/Engine/Physics/Vehicles/VehicleUserGuide/index.html
+
+Custom Vehicle
+https://www.youtube.com/playlist?list=PLXAwKe8ok5isn3wy5J5_adkg0DTOnLsq2
